@@ -1,0 +1,356 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://dunmatt.github.io/obo/obo.owl#"
+     xml:base="http://dunmatt.github.io/obo/obo.owl"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <owl:Ontology rdf:about="http://dunmatt.github.io/obo/obo.owl">
+        <owl:imports rdf:resource="http://www.ontospace.uni-bremen.de/ontology/stable/GUM-3-space.owl"/>
+        <rdfs:comment>Copyright 2016 by Matt Dunlap and Tufts University
+
+This ontology is licensed under Creative Commons Attribution 4.0 International (CC BY 4.0), the details of which can be found in human readable form at http://creativecommons.org/licenses/by/4.0/ and in legalese at http://creativecommons.org/licenses/by/4.0/legalcode .</rdfs:comment>
+        <owl:versionInfo>0.0.1</owl:versionInfo>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#AccelerationUnit -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#AccelerationUnit">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#Unit"/>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#Agent -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#Agent">
+        <rdfs:subClassOf rdf:resource="http://www.ontospace.uni-bremen.de/ontology/stable/GUM-3.owl#SimpleThing"/>
+        <rdfs:comment>An entity with an internal (hidden) state that factors into selecting its actions.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#AngleUnit -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#AngleUnit">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#Unit"/>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#AngularAccelerationUnit -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#AngularAccelerationUnit">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#Unit"/>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#AngularVelocityUnit -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#AngularVelocityUnit">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#Unit"/>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#AreaUnit -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#AreaUnit">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#Unit"/>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#AsciiString -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#AsciiString">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#String"/>
+        <rdfs:comment>A string (text data) that is encoded in ASCII.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#CollectionType -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#CollectionType">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#Datatype"/>
+        <rdfs:comment>Collection types are types whose instances in some sense contain other data.  For example, a Set, or an Option, or a List.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#Datatype -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#Datatype">
+        <rdfs:subClassOf rdf:resource="http://www.ontospace.uni-bremen.de/ontology/stable/GUM-3.owl#Abstraction"/>
+        <rdfs:comment>A datatype is the interpretation of some data.  Is that data an image or a long string?  Or perhaps a set of integers?</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#Enumeration -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#Enumeration">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#SingleValueType"/>
+        <rdfs:comment>Enumerations are values that can only take one of a fixed set of discrete values.  For example a traffic light might be one of RED, YELLOW or GREEN, so it might be represented by an enumeration with only those three possible values.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#Float -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#Float">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#SingleValueType"/>
+        <rdfs:comment>A floating point number (ie an element from the set R rounded to the nearest value that can be stored in the relevant precision).</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#ForceUnit -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#ForceUnit">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#Unit"/>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#Integer -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#Integer">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#SingleValueType"/>
+        <rdfs:comment>A whole number (ie an element from the set Z).</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#LengthUnit -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#LengthUnit">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#Unit"/>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#MassUnit -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#MassUnit">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#Unit"/>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#Message -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#Message">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#CollectionType"/>
+        <rdfs:subClassOf rdf:resource="http://www.ontospace.uni-bremen.de/ontology/stable/GUM-3.owl#OrderedObject"/>
+        <rdfs:comment>A message is an ordered collection of fields that can be sent between systems so that they can communicate.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#MessageField -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#MessageField">
+        <rdfs:subClassOf rdf:resource="http://www.ontospace.uni-bremen.de/ontology/stable/GUM-3.owl#NonDecomposableObject"/>
+        <rdfs:comment>A message field is the building block of a message.  Eg a message may have a name field that is a string, or an elevation field that is a real number and a length unit.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#NonConsciousAgent -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#NonConsciousAgent">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#Agent"/>
+        <rdfs:comment>An agent that cannot be realistically described as conscious.  E.g. a robotic vacuum cleaner.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#Option -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#Option">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#CollectionType"/>
+        <rdfs:comment>An Option is a datatype that indicates a value may or may not be present.  Thus an Option for an Integer could be zero, or it could not be anything (and these are distinct concepts).  Options, as with many collection types, are parameterized by another type to indicate what type they are collections of.  You can think of an Option as a collection that can have either zero or one item in it (but no more or less).</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#OrderedSet -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#OrderedSet">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#Set"/>
+        <rdfs:comment>Ordered sets are sets where the elements in the set have a fixed order.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#Quantity -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#Quantity">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#SingleValueType"/>
+        <rdfs:comment>A quantity is a numeric value with an associated unit.  For example: 5 kilometers or pi radians.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#QuantityVector -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#QuantityVector">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#Sequence"/>
+        <rdfs:comment>Quantity vectors are sequences of quantities that are all in the same units.  They are usually used for vector arithmetic (as opposed to other sequences that are usually only iterated over).</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#ScalarVector -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#ScalarVector">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#Sequence"/>
+        <rdfs:comment>Scalar vectors are sequences of numbers that do not have units.  They are usually used for vector arithmetic (as opposed to other sequences that are usually only iterated over).</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#Sequence -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#Sequence">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#CollectionType"/>
+        <rdfs:comment>Sequences are collections in which the order of the elements is defined and duplicate elements are possible.  Sequences, as with many collection types, are parameterized by another type to indicate what type they are collections of.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#Set -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#Set">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#CollectionType"/>
+        <rdfs:comment>A set is a datatype that indicates that distinct values may appear at most once each in the collection.  Sets, as with many collection types, are parameterized by another type to indicate what type they are collections of.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#SingleValueType -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#SingleValueType">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#Datatype"/>
+        <rdfs:comment>SingleValueType is any type whose instances always have exactly one value.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#String -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#String">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#SingleValueType"/>
+        <rdfs:comment>Used to designate strings, that is, data that is most correctly interpreted as a sequence of text characters in some encoding.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#TemperatureUnit -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#TemperatureUnit">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#Unit"/>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#TimeUnit -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#TimeUnit">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#Unit"/>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#TorqueUnit -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#TorqueUnit">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#Unit"/>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#Tuple -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#Tuple">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#CollectionType"/>
+        <rdfs:comment>Tuples are ordered collections that can contain elements of different types.  The full type of a Tuple is the sequence of types it contains
+
+For example, (&quot;steve&quot;, 5.2) and (&quot;rhombus&quot;, 5.2, &quot;rhombus&quot;) are both tuples, but they are different types because one is (String, Float) whereas the other is (String, Float, String).  Similarly (&quot;steve&quot;, 5.5) and (5.5, &quot;steve&quot;) are different types.
+
+For two tuples to be equal they must be of the same type and each element in them must be equal to the corresponding element in the other tuple.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#Unit -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#Unit">
+        <rdfs:subClassOf rdf:resource="http://www.ontospace.uni-bremen.de/ontology/stable/GUM-3.owl#Abstraction"/>
+        <rdfs:comment>Unit, as is used in every scientific discipline, eg Meters, Ounces, the other Ounces, micro-Farads.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#UnorderedSet -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#UnorderedSet">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#Set"/>
+        <rdfs:comment>Unordered sets are sets in which the ordering of the items is not defined (and thus not relevant).</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#Utf8String -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#Utf8String">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#String"/>
+        <rdfs:comment>A string (text data) that is encoded in UTF-8.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#VelocityUnit -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#VelocityUnit">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#Unit"/>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#VolumeUnit -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#VolumeUnit">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#Unit"/>
+    </owl:Class>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#WeightUnit -->
+
+    <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#WeightUnit">
+        <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#Unit"/>
+    </owl:Class>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.2.5.20160517-0735) https://github.com/owlcs/owlapi -->
+
