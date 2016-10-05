@@ -1,0 +1,11 @@
+@base <https://hrilab.tufts.edu/com/example/scratchpadMsg/> .
+@prefix : <http://dunmatt.github.io/obo/obo.owl> .
+
+<#meta>
+  a :MetaData ;
+  :messageVersion 0 .
+
+<#name>
+  a :StringField ;
+  :fieldNumber 0 ;
+  :requiredField true .

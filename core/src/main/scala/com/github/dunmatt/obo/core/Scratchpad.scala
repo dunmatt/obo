@@ -1,10 +1,16 @@
 package com.github.dunmatt.obo.core
 
 import javax.jmdns._
+import org.apache.jena.rdf.model.ModelFactory
 import org.zeromq.ZMQ
 // import scala.concurrent.ExecutionContext.Implicits.global
 // import scala.concurrent.Future
 
+
+object Thinker extends App {
+  val m = ModelFactory.createDefaultModel
+  m.read("~/Dropbox/code/obo/core/msg/main/scratchpad.ttl")
+}
 
 object Server extends App {
   val socket = ZMQ.context(1).socket(ZMQ.REP)
