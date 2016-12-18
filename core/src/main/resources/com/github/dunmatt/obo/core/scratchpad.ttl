@@ -1,7 +1,7 @@
-@base <https://hrilab.tufts.edu/com/example/scratchpadMsg/> .
+@base <https://hrilab.tufts.edu/com/github/dunmatt/obo/core/scratchpadMsg/> .
 @prefix : <http://dunmatt.github.io/obo/obo.owl> .
 
-<#meta>
+<#StringContainer>
   a :MetaData ;
   :messageVersion 0 .
 

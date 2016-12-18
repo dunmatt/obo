@@ -19,6 +19,27 @@ This ontology is licensed under Creative Commons Attribution 4.0 International (
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////
     //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#hasUnits -->
+
+    <owl:ObjectProperty rdf:about="http://dunmatt.github.io/obo/obo.owl#hasUnits">
+        <rdfs:subPropertyOf rdf:resource="http://www.ontospace.uni-bremen.de/ontology/stable/GUM-3.owl#hasModification"/>
+        <rdfs:domain rdf:resource="http://dunmatt.github.io/obo/obo.owl#MessageField"/>
+        <rdfs:range rdf:resource="http://dunmatt.github.io/obo/obo.owl#Unit"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
     // Data properties
     //
     ///////////////////////////////////////////////////////////////////////////////////////
@@ -61,6 +82,17 @@ fieldNumbers MUST be unique in each message, and, once created, can NEVER change
         <rdfs:domain rdf:resource="http://dunmatt.github.io/obo/obo.owl#MetaData"/>
         <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#positiveInteger"/>
         <rdfs:comment>What version is the message that has this as its metadata?</rdfs:comment>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#package -->
+
+    <owl:DatatypeProperty rdf:about="http://dunmatt.github.io/obo/obo.owl#package">
+        <rdfs:subPropertyOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#messageProperty"/>
+        <rdfs:domain rdf:resource="http://dunmatt.github.io/obo/obo.owl#MetaData"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>What namespace contains this message?</rdfs:comment>
     </owl:DatatypeProperty>
     
 
@@ -488,6 +520,73 @@ For two tuples to be equal they must be of the same type and each element in the
     <owl:Class rdf:about="http://dunmatt.github.io/obo/obo.owl#WeightUnit">
         <rdfs:subClassOf rdf:resource="http://dunmatt.github.io/obo/obo.owl#Unit"/>
     </owl:Class>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#feet -->
+
+    <owl:NamedIndividual rdf:about="http://dunmatt.github.io/obo/obo.owl#feet">
+        <rdf:type rdf:resource="http://dunmatt.github.io/obo/obo.owl#LengthUnit"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#inches -->
+
+    <owl:NamedIndividual rdf:about="http://dunmatt.github.io/obo/obo.owl#inches">
+        <rdf:type rdf:resource="http://dunmatt.github.io/obo/obo.owl#LengthUnit"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#kilometers -->
+
+    <owl:NamedIndividual rdf:about="http://dunmatt.github.io/obo/obo.owl#kilometers">
+        <rdf:type rdf:resource="http://dunmatt.github.io/obo/obo.owl#LengthUnit"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#meters -->
+
+    <owl:NamedIndividual rdf:about="http://dunmatt.github.io/obo/obo.owl#meters">
+        <rdf:type rdf:resource="http://dunmatt.github.io/obo/obo.owl#LengthUnit"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#miles -->
+
+    <owl:NamedIndividual rdf:about="http://dunmatt.github.io/obo/obo.owl#miles">
+        <rdf:type rdf:resource="http://dunmatt.github.io/obo/obo.owl#LengthUnit"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#millimeters -->
+
+    <owl:NamedIndividual rdf:about="http://dunmatt.github.io/obo/obo.owl#millimeters">
+        <rdf:type rdf:resource="http://dunmatt.github.io/obo/obo.owl#LengthUnit"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://dunmatt.github.io/obo/obo.owl#nauticalMiles -->
+
+    <owl:NamedIndividual rdf:about="http://dunmatt.github.io/obo/obo.owl#nauticalMiles">
+        <rdf:type rdf:resource="http://dunmatt.github.io/obo/obo.owl#LengthUnit"/>
+    </owl:NamedIndividual>
 </rdf:RDF>
 
 

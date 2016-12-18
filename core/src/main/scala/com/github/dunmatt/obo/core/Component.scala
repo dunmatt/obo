@@ -1,18 +1,21 @@
 package com.github.dunmatt.obo.core
 
+import com.github.dunmatt.obo.core.serial.SerialPortFactory
 import java.util.UUID
 import org.slf4j.Logger
 import scala.concurrent.Future
 
 trait Component {
   val log: Logger
-  val instanceId = UUID.randomUUID
+  final val instanceId = UUID.randomUUID
+  var connectionFactory: ConnectionFactory = null  // this is populated by the runner
+  var serialPortFactory: SerialPortFactory = null  // this is populated by the runner
 
-  def handleMessage(m: Message): Unit
+  def onHalt: Unit = Unit
 
-  def sendMessage(m: Message, dest: OboIdentifier): Future[Message]
+  def handleMessage(m: Message[_]): Option[Message[_]]
 
-  protected[core] def processMessageQueue: Unit
+  def name: String = getClass.getName
 
-  protected[core] def halt: Unit
+  def onStart: Unit = Unit
 }
