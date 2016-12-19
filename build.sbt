@@ -1,6 +1,7 @@
 import com.eny.plugin.spi.Imports.{ mapExport, SpiKeys }
 
 lazy val commonSettings = Seq( organization := "com.github.dunmatt"
+                             , platformTarget := "android-25"
                              , version := "0.0.2-SNAPSHOT"
                              , scalaVersion := "2.11.8"
                              , SpiKeys.spiPaths := Nil
@@ -33,6 +34,7 @@ lazy val components = (project in file("components"))
 
 lazy val androidComponents = (project in file("android-components"))
   .dependsOn(core, messages, utils)
+  .enablePlugins(AndroidLib)
   .settings(commonSettings: _*)
   .settings(exportJars := true)
 
@@ -43,9 +45,9 @@ lazy val jvmComponents = (project in file("jvm-components"))
 
 lazy val androidEntryPoint = (project in file("android-entry-point"))
   .dependsOn(core, components, androidComponents, utils)
-  .enablePlugins(SpiPlugin)
+  .enablePlugins(AndroidApp, SpiPlugin)
   .settings(commonSettings: _*)
-  .settings(proguardOptions in Android += "-keep class * extends com.github.dunmatt.obo.core.Component" )
+  .settings(proguardOptions in Android += "-keep class * extends com.github.dunmatt.obo.core.Component" )  // this from http://scala-on-android.taig.io/proguard/
   .settings(resourceGenerators in Compile += Def.task{
     // This task copies the list of Components to the appropriate place to ensure
     // it gets included in an accessible place in the APK

@@ -1,4 +1,4 @@
-package com.github.dunmatt.obo.android.serial
+package com.github.dunmatt.obo.android.entrypoint.serial
 
 import com.felhr.usbserial.{ UsbSerialDevice, UsbSerialInterface }
 import com.github.dunmatt.obo.core.serial.SerialPort

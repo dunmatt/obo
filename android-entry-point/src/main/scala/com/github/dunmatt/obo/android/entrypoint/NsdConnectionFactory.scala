@@ -1,4 +1,4 @@
-package com.github.dunmatt.obo.android
+package com.github.dunmatt.obo.android.entrypoint
 
 import android.content.Context
 import android.net.nsd.{ NsdManager, NsdServiceInfo }

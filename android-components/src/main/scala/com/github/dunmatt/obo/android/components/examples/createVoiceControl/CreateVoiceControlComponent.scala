@@ -1,4 +1,4 @@
-package com.github.dunmatt.obo.examples.createVoiceControl
+package com.github.dunmatt.obo.android.components.examples.createVoiceControl
 
 import com.github.dunmatt.obo.core.{ Component, Connection, Message, OboIdentifier }
 import com.github.dunmatt.obo.iRobotCreate.{ DriveStraight, Stop }

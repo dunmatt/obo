@@ -1,4 +1,4 @@
-package com.github.dunmatt.obo.android
+package com.github.dunmatt.obo.android.entrypoint
 
 import android.app.{ Notification, PendingIntent, Service }
 import android.content.{ Context, Intent }

@@ -1,8 +1,8 @@
-package com.github.dunmatt.obo.android
+package com.github.dunmatt.obo.android.entrypoint
 
 import android.content.Context
 import android.net.nsd.{ NsdManager, NsdServiceInfo }
-import com.github.dunmatt.obo.android.serial.AndroidSerialPortFactory
+import com.github.dunmatt.obo.android.entrypoint.serial.AndroidSerialPortFactory
 import com.github.dunmatt.obo.core.{ ComponentRunner, Constants }
 import org.slf4j.LoggerFactory
 import org.zeromq.ZMQ

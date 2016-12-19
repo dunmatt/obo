@@ -1,4 +1,4 @@
-package com.github.dunmatt.obo.android.serial
+package com.github.dunmatt.obo.android.entrypoint.serial
 
 import android.app.PendingIntent
 import android.content.{ BroadcastReceiver, Context, Intent, IntentFilter }
