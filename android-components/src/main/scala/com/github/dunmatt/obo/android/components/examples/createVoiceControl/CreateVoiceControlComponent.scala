@@ -1,14 +1,15 @@
 package com.github.dunmatt.obo.android.components.examples.createVoiceControl
 
-import com.github.dunmatt.obo.core.{ Component, Connection, Message, OboIdentifier }
+import com.github.dunmatt.obo.core.{ Connection, Message, OboIdentifier }
 import com.github.dunmatt.obo.iRobotCreate.{ DriveStraight, Stop }
+import com.github.dunmatt.obo.android.core.AndroidComponent
 import org.slf4j.LoggerFactory
 import scala.concurrent.{ Await, Future, Promise }
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Failure
 import squants.motion.VelocityConversions._
 
-class CreateVoiceControlComponent extends Component {
+class CreateVoiceControlComponent extends AndroidComponent {
   val log = LoggerFactory.getLogger(getClass)
   private val createComponentP = Promise[Connection]
   createComponentP.future.onSuccess { case conn =>

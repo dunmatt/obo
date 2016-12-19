@@ -2,6 +2,7 @@ package com.github.dunmatt.obo.android.entrypoint
 
 import android.content.Context
 import android.net.nsd.{ NsdManager, NsdServiceInfo }
+import com.github.dunmatt.obo.android.core.AndroidComponent
 import com.github.dunmatt.obo.android.entrypoint.serial.AndroidSerialPortFactory
 import com.github.dunmatt.obo.core.{ ComponentRunner, Constants }
 import org.slf4j.LoggerFactory
@@ -21,6 +22,10 @@ class AndroidComponentRunner(componentName: String)(implicit context: Context) e
       c.connectionFactory = ncf
       c.serialPortFactory = new AndroidSerialPortFactory(context, zctx)
       nsdManager.discoverServices(Constants.DNSSD_SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, ncf)
+      c match {
+        case ac: AndroidComponent => ac.context = context
+        case _ => Unit
+      }
     case Failure(e) => log.error(s"Couldn't construct a $componentName", e)
   }
   protected var listeningForData = true
