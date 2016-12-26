@@ -34,13 +34,14 @@ class NsdConnectionFactory(nsdManager: NsdManager) extends ConnectionFactory
   }
 
   protected def satisfiesIdentifier(oi: OboIdentifier, info: NsdServiceInfo): Boolean = {
-    oi.refersToServiceNamed(new String(info.getAttributes.get(Constants.COMPONENT_NAME_KEY)))
+    Option(info.getAttributes.get(Constants.COMPONENT_NAME_KEY)).map { rawName =>
+      oi.refersToServiceNamed(new String(rawName))
+    }.getOrElse(false)
   }
 
   protected def alertPendingConnections: Unit = {
     pendingConnections = pendingConnections.filter { case (oi, p) =>
       val service = services.find(s => satisfiesIdentifier(oi, s))
-      service.foreach { s => connect(s, p) }
       service.isEmpty
     }
   }

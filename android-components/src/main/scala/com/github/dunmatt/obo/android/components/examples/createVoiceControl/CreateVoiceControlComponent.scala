@@ -11,6 +11,7 @@ import squants.motion.VelocityConversions._
 
 class CreateVoiceControlComponent extends AndroidComponent {
   val log = LoggerFactory.getLogger(getClass)
+  override val uiActivityClass = Some(classOf[VoiceControlActivity])
   private val createComponentP = Promise[Connection]
   createComponentP.future.onSuccess { case conn =>
     new Thread(new Runnable {

@@ -4,7 +4,7 @@ import android.content.Context
 import android.net.nsd.{ NsdManager, NsdServiceInfo }
 import com.github.dunmatt.obo.android.core.AndroidComponent
 import com.github.dunmatt.obo.android.entrypoint.serial.AndroidSerialPortFactory
-import com.github.dunmatt.obo.core.{ ComponentRunner, Constants }
+import com.github.dunmatt.obo.core.{ Component, ComponentRunner, Constants }
 import org.slf4j.LoggerFactory
 import org.zeromq.ZMQ
 import scala.util.{ Failure, Success }
@@ -23,24 +23,26 @@ class AndroidComponentRunner(componentName: String)(implicit context: Context) e
       c.serialPortFactory = new AndroidSerialPortFactory(context, zctx)
       nsdManager.discoverServices(Constants.DNSSD_SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, ncf)
       c match {
-        case ac: AndroidComponent => ac.context = context
+        case ac: AndroidComponent =>
+          ac.context = context
+          ac.addUiNotification
         case _ => Unit
       }
     case Failure(e) => log.error(s"Couldn't construct a $componentName", e)
   }
   protected var listeningForData = true
-  def listening = listeningForData
+  // def listening = listeningForData
 
   def mainLoop: Unit = component.foreach { c =>
-    advertizeComponent(componentName)
+    advertizeComponent(c)
     mainLoop(c)
   }
 
-  protected def advertizeComponent(name: String): Unit = {
+  protected def advertizeComponent(c: Component): Unit = {
     val info = new NsdServiceInfo
     info.setServiceName(Constants.RPC_SERVICE_DNSSD_NAME)
     info.setServiceType(Constants.DNSSD_SERVICE_TYPE)
-    info.setAttribute(Constants.COMPONENT_NAME_KEY, name)
+    info.setAttribute(Constants.COMPONENT_NAME_KEY, c.name)
     info.setPort(port)
     nsdManager.registerService(info, NsdManager.PROTOCOL_DNS_SD, registrationListener)
   }
@@ -50,7 +52,6 @@ class AndroidComponentRunner(componentName: String)(implicit context: Context) e
     new Thread (new Runnable {
       override def run: Unit = {
         nsdManager.unregisterService(registrationListener)
-        // component.foreach(_.serialPortFactory.closeEverything)
         component.foreach (_.connectionFactory match {
           case listener: NsdManager.DiscoveryListener => nsdManager.stopServiceDiscovery(listener)
           case _ => log.error("The component's connection factory no longer implements DiscoveryListener, fix AndroidComponentRunner!")

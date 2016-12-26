@@ -29,9 +29,9 @@ class MainActivity extends AppCompatActivity {
     val components = Source.fromInputStream(getAssets.open(classOf[Component].getName)).getLines.toArray
     val componentAdapter = new ArrayAdapter(context, R.layout.component_list_item, components.map(friendlyName))
     // try {
-    val intent = new Intent(context, classOf[AndroidComponentService])
     vh.component_list.setOnItemClickListener(new AdapterView.OnItemClickListener {
       def onItemClick(lv: AdapterView[_], v: View, position: Int, id: Long): Unit = {
+        val intent = new Intent(context, classOf[AndroidComponentService])
         intent.putExtra(Constants.COMPONENT_NAME_KEY, components(position))
         startService(intent)
       }

@@ -1,12 +1,21 @@
 import com.eny.plugin.spi.Imports.{ mapExport, SpiKeys }
 
+val componentName = "com.github.dunmatt.obo.core.Component"
+
 lazy val commonSettings = Seq( organization := "com.github.dunmatt"
                              , platformTarget := "android-25"
                              , version := "0.0.2-SNAPSHOT"
                              , scalaVersion := "2.11.8"
                              , SpiKeys.spiPaths := Nil
-                             , SpiKeys.traits := Seq("com.github.dunmatt.obo.core.Component")
+                             , SpiKeys.traits := Seq( componentName
+                                                    , "com.github.dunmatt.obo.android.core.AndroidComponent")
                              )
+
+lazy val androidSettings = Seq( proguardOptions in Android ++= Seq( "-keep class * extends com.github.dunmatt.obo.core.Component"    // this from http://scala-on-android.taig.io/proguard/
+                                                                   // TODO: once it works try taking these next two out and see if it breaks
+                                                                  , "-keep class * extends com.github.dunmatt.obo.android.core.AndroidComponent"
+                                                                  , "-keep class com.github.dunmatt.obo.android.components.** { *; }"
+                                                                  ))
 
 lazy val root = (project in file("."))
   .aggregate(core, androidEntryPoint, jvmEntryPoint)
@@ -29,13 +38,14 @@ lazy val core = (project in file("core"))
 lazy val components = (project in file("components"))
   .dependsOn(core, messages, utils)
   .settings(commonSettings: _*)
-  // .settings(android.Plugin.androidBuildAar: _*)
   .settings(exportJars := true)
 
 lazy val androidComponents = (project in file("android-components"))
   .dependsOn(core, messages, utils)
   .enablePlugins(AndroidLib)
+  // .settings(android.Plugin.androidBuildAar: _*)
   .settings(commonSettings: _*)
+  .settings(androidSettings: _*)
   .settings(exportJars := true)
 
 lazy val jvmComponents = (project in file("jvm-components"))
@@ -45,17 +55,23 @@ lazy val jvmComponents = (project in file("jvm-components"))
 
 lazy val androidEntryPoint = (project in file("android-entry-point"))
   .dependsOn(core, components, androidComponents, utils)
+  // .dependsOn(core, components, utils)
+  // .androidBuildWith(androidComponents)
   .enablePlugins(AndroidApp, SpiPlugin)
   .settings(commonSettings: _*)
-  .settings(proguardOptions in Android += "-keep class * extends com.github.dunmatt.obo.core.Component" )  // this from http://scala-on-android.taig.io/proguard/
+  .settings(androidSettings: _*)
+  // .settings()
   .settings(resourceGenerators in Compile += Def.task{
     // This task copies the list of Components to the appropriate place to ensure
     // it gets included in an accessible place in the APK
     val res = collectResources.value._1  // item _1 here is for assets, item _2 is for resources.  See the output of sbt "show androidEntryPoint/android:collectResources"
+    val componentList = res / componentName
+    IO.delete(componentList)
+    IO.touch(componentList)
     mapExport.value.toSeq.map { name =>
-      IO.move(target.value / name, res / name)
-      res / name
+      IO.append(componentList, IO.read(target.value / name))
     }
+    List(componentList)
   }.taskValue)
 
 // TODO: this currently depends on rxtx from maven central, it should probably instead depend on a local property

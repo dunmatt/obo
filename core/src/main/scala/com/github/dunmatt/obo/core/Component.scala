@@ -15,7 +15,7 @@ trait Component {
 
   def handleMessage(m: Message[_]): Option[Message[_]]
 
-  def name: String = getClass.getName
+  def name: String = getClass.getName  // TODO: consider changing this to only the classname and final namespace chunk
 
   def onStart: Unit = Unit
 }

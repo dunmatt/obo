@@ -3,5 +3,6 @@
       package="com.github.dunmatt.obo.android.components">
   <uses-sdk android:minSdkVersion="23"
             android:targetSdkVersion="25" />
-  <!-- <activity android:name="VoiceControlActivity"/> -->
+  <uses-permission android:name="android.permission.RECORD_AUDIO" />
+  <activity android:name=".examples.createVoiceControl.VoiceControlActivity"/>
 </manifest>
