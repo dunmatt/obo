@@ -8,6 +8,7 @@ import scala.concurrent.Future
 trait Component {
   val log: Logger
   final val instanceId = UUID.randomUUID
+  final val shortId = instanceId.getLeastSignificantBits.toInt
   var connectionFactory: ConnectionFactory = null  // this is populated by the runner
   var serialPortFactory: SerialPortFactory = null  // this is populated by the runner
 

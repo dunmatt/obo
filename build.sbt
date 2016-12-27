@@ -68,7 +68,7 @@ lazy val androidEntryPoint = (project in file("android-entry-point"))
     val componentList = res / componentName
     IO.delete(componentList)
     IO.touch(componentList)
-    mapExport.value.toSeq.map { name =>
+    mapExport.value.foreach { name =>
       IO.append(componentList, IO.read(target.value / name))
     }
     List(componentList)

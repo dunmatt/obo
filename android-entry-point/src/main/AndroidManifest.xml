@@ -11,7 +11,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <application android:label="@string/app_name"
                  android:icon="@drawable/scala_android">
-        <!-- <uses-library android:name="com.github.dunmatt.obo.core" /> -->
         <service android:name=".AndroidComponentService" />
         <activity android:name="MainActivity"
                   android:theme="@style/Theme.AppCompat"

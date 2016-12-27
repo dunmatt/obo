@@ -4,5 +4,13 @@
   <uses-sdk android:minSdkVersion="23"
             android:targetSdkVersion="25" />
   <uses-permission android:name="android.permission.RECORD_AUDIO" />
-  <activity android:name=".examples.createVoiceControl.VoiceControlActivity"/>
+  <application>
+  <activity android:name=".examples.createVoiceControl.VoiceControlActivity"
+            android:taskAffinity=""
+            android:launchMode="singleTask">
+<!--     <intent-filter>
+    </intent-filter>
+ -->
+  </activity>
+</application>
 </manifest>

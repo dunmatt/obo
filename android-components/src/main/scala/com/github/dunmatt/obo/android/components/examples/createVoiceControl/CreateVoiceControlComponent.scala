@@ -29,8 +29,13 @@ class CreateVoiceControlComponent extends AndroidComponent {
   createComponentP.future.onFailure { case e => log.error(s"Couldn't connect to Create.  $e") }
 
   override def onStart {
+    super.onStart
     val createId = OboIdentifier("com.github.dunmatt.obo.iRobotCreate.CreateComponent")
     createComponentP.completeWith(connectionFactory.connectTo(createId))
+  }
+
+  override def onHalt {
+    super.onHalt
   }
 
   def handleMessage(m: Message[_]): Option[Message[_]] = None
