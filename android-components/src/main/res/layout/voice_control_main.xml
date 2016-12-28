@@ -4,7 +4,10 @@
              android:orientation="vertical"
              android:layout_width="match_parent"
              android:layout_height="match_parent">
-  <Button android:id="@+id/speak_button"/>
+  <Button android:id="@+id/speak_button"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="Start Speaking"/>
   <ListView android:id="@+id/list_of_random_stuff"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>

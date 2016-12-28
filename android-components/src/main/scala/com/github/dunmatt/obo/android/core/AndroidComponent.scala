@@ -11,28 +11,14 @@ trait AndroidComponent extends Component {
   val uiActivityClass: Option[Class[_ <: Activity]] = None
 
   def addUiNotification: Unit = uiActivityClass.foreach { cls =>
-    // val activityName = new ComponentName("", cls.getName)
-    val activityName = new ComponentName("com.github.dunmatt.obo.android.components", cls.getName)
     val stackBuilder = TaskStackBuilder.create(context)
     stackBuilder.addParentStack(cls)
-
-    // cls.newInstance
-    // log.warn(s"$cls")
-    // stackBuilder.addNextIntent(new Intent(context, cls))
-    // val pending = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
-    // // TODO: add a "halt component" action to the dismiss swipe
-    val goToUi = new Intent
-    // TODO: find a way to tie this to the one in the manifest...
-    goToUi.setComponent(activityName)
-    // val goToUi = new Intent(context, cls)
-    // goToUi.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-    goToUi.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK)
-    val pending = PendingIntent.getActivity(context, shortId, goToUi, 0)
+    stackBuilder.addNextIntent(new Intent(context, cls))
+    val pending = stackBuilder.getPendingIntent(shortId, PendingIntent.FLAG_UPDATE_CURRENT)
     val notification = new Notification.Builder(context)
                                        .setContentTitle(name)
                                        .setContentText("Go to the component UI")
                                        .setSmallIcon(R.drawable.scala_android)
-                                       // .setCategory(Notification.CATEGORY_SERVICE)
                                        .setContentIntent(pending)
                                        .build
     Option(context.getSystemService(Context.NOTIFICATION_SERVICE)) match {
