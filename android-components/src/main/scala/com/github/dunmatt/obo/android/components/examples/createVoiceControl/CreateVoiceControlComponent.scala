@@ -16,43 +16,26 @@ class CreateVoiceControlComponent extends AndroidComponent {
   import CreateVoiceControlComponent._
   val log = LoggerFactory.getLogger(getClass)
   override val uiActivityClass = Some(classOf[VoiceControlActivity])
-  private val socket = zctx.socket(ZMQ.PULL)
-  socket.bind(s"inproc://$instanceId")
+  private val activitySocket = zctx.socket(ZMQ.PULL)
+  private val killActivity = zctx.socket(ZMQ.PUSH)
   log.info(s"Binding to inproc://$instanceId")
+  activitySocket.bind(s"inproc://$instanceId")
+  killActivity.bind(s"inproc://$instanceId/kill")
   private var forwardCommands = true
-
-  private val createComponentP = Promise[Connection]
-  createComponentP.future.onSuccess { case conn =>
-    new Thread(new Runnable {
-      def run {
-        log.info("Running")
-        Thread.sleep(1000)
-        conn.send(DriveStraight(0.1 mps))
-        Thread.sleep(10000)
-        conn.send(new Stop)
-        conn.close
-        log.info("Done")
-      }
-    }).start
-  }
-  createComponentP.future.onFailure { case e => log.error(s"Couldn't connect to Create.  $e") }
 
   override def onStart {
     super.onStart
     val createId = OboIdentifier("com.github.dunmatt.obo.iRobotCreate.CreateComponent")
     val createComponentConnection = connectionFactory.connectTo(createId)
-    createComponentP.completeWith(createComponentConnection)
 
     new Thread(new Runnable {
       def run {
         try {
           while (forwardCommands) {
-            socket.recv(ZMQ.NOBLOCK) match {
+            activitySocket.recv(ZMQ.NOBLOCK) match {
               case null => Thread.sleep(100)  // ms
-            // socket.recv match {
-            //   case null => forwardCommands = false
               case bytes =>
-                log.info(s"Got ${new String(bytes)} from the voice recognition component.")
+                log.debug(s"Got ${new String(bytes)} from the voice recognition activity.")
                 maybeSendCommand(new String(bytes), createComponentConnection)
             }
           }
@@ -64,7 +47,6 @@ class CreateVoiceControlComponent extends AndroidComponent {
   }
 
   def maybeSendCommand(spokenText: String, connection: Future[Connection]): Unit = {
-    // Toast.makeText(context, spokenText, Toast.LENGTH_LONG).show
     if (connection.isCompleted) {
       if (spokenText.contains("stop")) {
         connection.foreach(_.send(new Stop))
@@ -83,6 +65,10 @@ class CreateVoiceControlComponent extends AndroidComponent {
   override def onHalt {
     super.onHalt
     forwardCommands = false
+    killActivity.send(Array(0.toByte))
+    log.info("Sent kill signal to VoiceControlActivity")
+    killActivity.close
+    activitySocket.close
   }
 
   def handleMessage(m: Message[_]): Option[Message[_]] = None

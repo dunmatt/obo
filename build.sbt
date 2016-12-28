@@ -12,9 +12,6 @@ lazy val commonSettings = Seq( organization := "com.github.dunmatt"
                              )
 
 lazy val androidSettings = Seq( proguardOptions in Android ++= Seq( "-keep class * extends com.github.dunmatt.obo.core.Component"    // this from http://scala-on-android.taig.io/proguard/
-                                                                   // TODO: once it works try taking these next two out and see if it breaks
-                                                                  , "-keep class * extends com.github.dunmatt.obo.android.core.AndroidComponent"
-                                                                  , "-keep class com.github.dunmatt.obo.android.components.** { *; }"
                                                                   ))
 
 lazy val root = (project in file("."))

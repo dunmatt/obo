@@ -11,21 +11,19 @@ import zmq.ZMQ.ZMQ_SNDMORE
 class RequestResponseConnection(url: String) extends Connection {
   import RequestResponseConnection._
   private val log = LoggerFactory.getLogger(getClass)
-  private val socket = ZMQ.context(1).socket(ZMQ.REQ)  // TODO: should this context be an implicit param?
+  private val socket = ZMQ.context(1).socket(ZMQ.REQ)  // TODO: this context be an implicit param
   private val metaMessageFactory = new MetaMessageFactory
   private var factoryCache = Map.empty[String, MessageFactory[_ <: Message[_]]]
   socket.connect(url)
-  log.debug(s"Connected to $url")
+  log.info(s"Connected to $url")
   
-  // TODO: add a timeout
   def send(msg: Message[_]): Future[Option[Message[_]]] = {
     Future {
       socket.synchronized {
-        // TODO: these two logs should be debug
-        log.info(s"""About to send $msg (${msg.getBytes.mkString(", ")})""")
+        // log.debug(s"""About to send $msg (${msg.getBytes.mkString(", ")})""")
         socket.send(MetaMessage(msg.factory.getName).getBytes, ZMQ_SNDMORE)
-        socket.send(msg.getBytes, 0)
-        log.info(s"Sent $msg")
+        socket.send(msg.getBytes)
+        log.debug(s"Sent $msg")
         // TODO: put a timeout here
         val reply = socket.recv(0)
         reply.toSeq match {  // TODO: possible null ref here, fix it!!
@@ -55,7 +53,7 @@ class RequestResponseConnection(url: String) extends Connection {
 
   private def abortRecv: Option[Message[_]] = {
     while (socket.hasReceiveMore) {
-      socket.recv
+      socket.recv(0)
     }
     None
   }

@@ -22,36 +22,29 @@ class VoiceControlActivity extends Activity with View.OnClickListener {
   import CreateVoiceControlComponent._
   implicit val context = this
   protected val log = LoggerFactory.getLogger(getClass)
-  // private val tempSocket = zctx.socket(ZMQ.PULL)
+  private val killSignal = zctx.socket(ZMQ.PULL)
   private val socket = zctx.socket(ZMQ.PUSH)
   socket.setSendTimeOut(500)
-  // private var vh: TypedViewHolder.voice_control_main = null  // populated first in onCreate
 
   override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
-    // connect back to the component via inproc
     val componentId = getIntent.getStringExtra(Constants.COMPONENT_ID_KEY)
-    // Toast.makeText(context, componentId, Toast.LENGTH_LONG).show
+    // connect back to the component via inproc
     new Thread(new Runnable {
       def run {
-        // tempSocket.bind(s"inproc://$componentId")
         socket.connect(s"inproc://$componentId")
         log.info(s"Connecting to inproc://$componentId")
+        killSignal.connect(s"inproc://$componentId/kill")
+        killSignal.recv  // this is a blocking call until the kill signal is sent
+        killSignal.close
+        socket.close
+        log.info("Stopping VoiceControlActivity")
+        context.finish  // closes this activity
       }
     }).start
     
     val vh = TypedViewHolder.setContentView(this, TR.layout.voice_control_main)
     vh.speak_button.setOnClickListener(this)
-
-    // new Thread(new Runnable {
-    //   def run {
-    //     (0 until 30).foreach { _ =>
-    //       log.info(new String(tempSocket.recv))
-    //       // Toast.makeText(context, new String(tempSocket.recv), Toast.LENGTH_LONG).show
-    //       // Thread.sleep(1000)
-    //     }
-    //   }
-    // }).start
   }
 
   def startVoiceRecognitionActivity: Unit = {
