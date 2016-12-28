@@ -60,12 +60,13 @@ class MsgReader(private val data: ByteBuffer) {
     if (MsgReader.isString(data.get(idx))) {
       val metaLength = sizeOfMetadataAt(idx)
       val length = sizeOfFieldAt(idx) - metaLength
-      if (idx + metaLength + length < data.limit) {
+      if (idx + metaLength + length <= data.limit) {
         val buff = Array.ofDim[Byte](length)
-        data.get(buff, idx + metaLength, length)
+        data.position(idx + metaLength)
+        data.get(buff, 0, length)
         Success(new String(buff, "UTF-8"))
       } else {
-        Failure(new Exception("String would exceed the underlying buffer, perhaps a malformed packet?"))
+        Failure(new Exception(s"String would exceed the underlying buffer, perhaps a malformed packet?  Index: $idx, MetadataLength: $metaLength, StrLen: $length, Limit: ${data.limit}"))
       }
     } else {
       Failure(new Exception(s"String type not found at $idx."))

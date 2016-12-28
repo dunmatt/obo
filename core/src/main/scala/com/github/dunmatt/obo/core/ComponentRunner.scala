@@ -88,7 +88,9 @@ trait ComponentRunner {
 
   protected def handleMessageInternally(msg: Message[_]): Option[Message[_]] = msg match {
     // TODO: respond to some message types here
-    case _ => None
+    case _ =>
+      log.info(s"Got message $msg")   // TODO: take this out
+      None
   }
 }
 

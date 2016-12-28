@@ -40,8 +40,10 @@ class NsdConnectionFactory(nsdManager: NsdManager) extends ConnectionFactory
   }
 
   protected def alertPendingConnections: Unit = {
+    // TODO: clean me up, this isn't as clean as it should be
     pendingConnections = pendingConnections.filter { case (oi, p) =>
       val service = services.find(s => satisfiesIdentifier(oi, s))
+      service.foreach(connect(_, p))
       service.isEmpty
     }
   }

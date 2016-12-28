@@ -19,20 +19,39 @@ import scala.collection.JavaConversions._
 // most of this code taken from http://stackoverflow.com/questions/11798337/how-to-voice-commands-into-an-android-application
 class VoiceControlActivity extends Activity with View.OnClickListener {
   import VoiceControlActivity._
+  import CreateVoiceControlComponent._
   implicit val context = this
   protected val log = LoggerFactory.getLogger(getClass)
-  protected val zctx = ZMQ.context(1)
+  // private val tempSocket = zctx.socket(ZMQ.PULL)
   private val socket = zctx.socket(ZMQ.PUSH)
+  socket.setSendTimeOut(500)
   // private var vh: TypedViewHolder.voice_control_main = null  // populated first in onCreate
 
   override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
     // connect back to the component via inproc
     val componentId = getIntent.getStringExtra(Constants.COMPONENT_ID_KEY)
-    socket.connect(s"inproc://$componentId")
+    // Toast.makeText(context, componentId, Toast.LENGTH_LONG).show
+    new Thread(new Runnable {
+      def run {
+        // tempSocket.bind(s"inproc://$componentId")
+        socket.connect(s"inproc://$componentId")
+        log.info(s"Connecting to inproc://$componentId")
+      }
+    }).start
     
     val vh = TypedViewHolder.setContentView(this, TR.layout.voice_control_main)
     vh.speak_button.setOnClickListener(this)
+
+    // new Thread(new Runnable {
+    //   def run {
+    //     (0 until 30).foreach { _ =>
+    //       log.info(new String(tempSocket.recv))
+    //       // Toast.makeText(context, new String(tempSocket.recv), Toast.LENGTH_LONG).show
+    //       // Thread.sleep(1000)
+    //     }
+    //   }
+    // }).start
   }
 
   def startVoiceRecognitionActivity: Unit = {
@@ -45,11 +64,14 @@ class VoiceControlActivity extends Activity with View.OnClickListener {
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Unit = {
     if (requestCode == VOICE_RECOGNITION_REQUEST_CODE) {
       val matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-      // TODO: spin up a thread to do this work to avoid an exception?
-      matches.foreach { word =>
-        // Toast.makeText(context, word, Toast.LENGTH_LONG).show
-        socket.send(word)
-      }
+      new Thread(new Runnable {
+        def run {
+          matches.foreach { word =>
+            log.info(s"""Sending: "$word" back to the component.""")
+            socket.send(word)
+          }
+        }
+      }).start
     }
   }
 

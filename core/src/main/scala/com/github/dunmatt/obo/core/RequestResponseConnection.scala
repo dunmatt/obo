@@ -20,15 +20,19 @@ class RequestResponseConnection(url: String) extends Connection {
   // TODO: add a timeout
   def send(msg: Message[_]): Future[Option[Message[_]]] = {
     Future {
-      log.info(s"""About to send $msg (${msg.getBytes.mkString(", ")})""")
-      socket.send(msg.factory.getName, ZMQ_SNDMORE)
-      socket.send(msg.getBytes, 0)
-      log.info(s"Sent $msg")
-      val reply = socket.recv(0)
-      reply.toSeq match {  // TODO: possible null ref here, fix it!!
-        case ACK => None  // this is fine, there was just no response
-        case NACK => log.warn("Got a NACK back, connection may be in a weird state."); None
-        case s: Seq[_] => handleReceivedMetaBytes(reply)
+      socket.synchronized {
+        // TODO: these two logs should be debug
+        log.info(s"""About to send $msg (${msg.getBytes.mkString(", ")})""")
+        socket.send(MetaMessage(msg.factory.getName).getBytes, ZMQ_SNDMORE)
+        socket.send(msg.getBytes, 0)
+        log.info(s"Sent $msg")
+        // TODO: put a timeout here
+        val reply = socket.recv(0)
+        reply.toSeq match {  // TODO: possible null ref here, fix it!!
+          case ACK => None  // this is fine, there was just no response
+          case NACK => log.warn("Got a NACK back, connection may be in a weird state."); None
+          case _ => handleReceivedMetaBytes(reply)
+        }
       }
     }
   }
