@@ -22,8 +22,9 @@ class VoiceControlActivity extends Activity with View.OnClickListener {
   import CreateVoiceControlComponent._
   implicit val context = this
   protected val log = LoggerFactory.getLogger(getClass)
-  private val killSignal = zctx.socket(ZMQ.PULL)
-  private val socket = zctx.socket(ZMQ.PUSH)
+  private val killSignal = zctx.socket(ZMQ.SUB)
+  killSignal.subscribe(Array.empty)
+  private val socket = zctx.socket(ZMQ.PUB)
   socket.setSendTimeOut(500)
 
   override def onCreate(savedInstanceState: Bundle): Unit = {
@@ -35,7 +36,7 @@ class VoiceControlActivity extends Activity with View.OnClickListener {
         socket.connect(s"inproc://$componentId")
         log.info(s"Connecting to inproc://$componentId")
         killSignal.connect(s"inproc://$componentId/kill")
-        killSignal.recv  // this is a blocking call until the kill signal is sent
+        killSignal.recv(0)  // this is a blocking call until the kill signal is sent
         killSignal.close
         socket.close
         log.info("Stopping VoiceControlActivity")

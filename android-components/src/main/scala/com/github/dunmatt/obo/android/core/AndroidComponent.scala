@@ -31,7 +31,7 @@ trait AndroidComponent extends Component {
         case None => log.error("Couldn't get the notification service... are you running an ancient version of android?")
       }
       // start the activity for good measure
-      // context.startActivity(intent)
+      context.startActivity(intent)
     }
   }
 

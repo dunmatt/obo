@@ -23,7 +23,7 @@ class RequestResponseConnection(url: String)(implicit val zctx: ZMQ.Context) ext
         // log.debug(s"""About to send $msg (${msg.getBytes.mkString(", ")})""")
         socket.send(MetaMessage(msg.factory.getName).getBytes, ZMQ_SNDMORE)
         socket.send(msg.getBytes)
-        log.info(s"Sent $msg")
+        log.debug(s"Sent $msg")
         // TODO: put a timeout here
         val reply = socket.recv(0)
         reply.toSeq match {  // TODO: possible null ref here, fix it!!

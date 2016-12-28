@@ -16,8 +16,9 @@ class CreateVoiceControlComponent extends AndroidComponent {
   import CreateVoiceControlComponent._
   val log = LoggerFactory.getLogger(getClass)
   override val uiActivityClass = Some(classOf[VoiceControlActivity])
-  private val activitySocket = zctx.socket(ZMQ.PULL)
-  private val killActivity = zctx.socket(ZMQ.PUSH)
+  private val activitySocket = zctx.socket(ZMQ.SUB)
+  private val killActivity = zctx.socket(ZMQ.PUB)
+  activitySocket.subscribe(Array.empty)  // empty array here means subscribe to everything
   log.info(s"Binding to inproc://$instanceId")
   activitySocket.bind(s"inproc://$instanceId")
   killActivity.bind(s"inproc://$instanceId/kill")
@@ -68,7 +69,7 @@ class CreateVoiceControlComponent extends AndroidComponent {
   override def onHalt {
     super.onHalt
     forwardCommands = false
-    killActivity.send(Array(0.toByte))
+    killActivity.send(Array(0.toByte))  // the zero here doesn't matter, the other side doesn't read it
     log.info("Sent kill signal to VoiceControlActivity")
     killActivity.close
     activitySocket.close
