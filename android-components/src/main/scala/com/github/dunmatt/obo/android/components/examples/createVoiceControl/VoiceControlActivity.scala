@@ -9,8 +9,11 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.view.View
 import android.widget.{ Button, ListView, Toast }
+import com.github.dunmatt.obo.core.Constants
 import com.github.dunmatt.obo.android.components.{ TR, TypedViewHolder }
+import java.util.UUID
 import org.slf4j.LoggerFactory
+import org.zeromq.ZMQ
 import scala.collection.JavaConversions._
 
 // most of this code taken from http://stackoverflow.com/questions/11798337/how-to-voice-commands-into-an-android-application
@@ -18,12 +21,17 @@ class VoiceControlActivity extends Activity with View.OnClickListener {
   import VoiceControlActivity._
   implicit val context = this
   protected val log = LoggerFactory.getLogger(getClass)
-  private var vh: TypedViewHolder.voice_control_main = null  // populated first in onCreate
+  protected val zctx = ZMQ.context(1)
+  private val socket = zctx.socket(ZMQ.PUSH)
+  // private var vh: TypedViewHolder.voice_control_main = null  // populated first in onCreate
 
   override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
-    log.info("Starting Voice Control Activity +++++++++++++++++++++++++++++++")
-    vh = TypedViewHolder.setContentView(this, TR.layout.voice_control_main)
+    // connect back to the component via inproc
+    val componentId = getIntent.getStringExtra(Constants.COMPONENT_ID_KEY)
+    socket.connect(s"inproc://$componentId")
+    
+    val vh = TypedViewHolder.setContentView(this, TR.layout.voice_control_main)
     vh.speak_button.setOnClickListener(this)
   }
 
@@ -37,8 +45,10 @@ class VoiceControlActivity extends Activity with View.OnClickListener {
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Unit = {
     if (requestCode == VOICE_RECOGNITION_REQUEST_CODE) {
       val matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+      // TODO: spin up a thread to do this work to avoid an exception?
       matches.foreach { word =>
-        Toast.makeText(context, word, Toast.LENGTH_LONG).show
+        // Toast.makeText(context, word, Toast.LENGTH_LONG).show
+        socket.send(word)
       }
     }
   }

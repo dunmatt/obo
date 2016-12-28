@@ -25,13 +25,11 @@ class AndroidComponentRunner(componentName: String)(implicit context: Context) e
       c match {
         case ac: AndroidComponent =>
           ac.context = context
-          ac.addUiNotification
         case _ => Unit
       }
     case Failure(e) => log.error(s"Couldn't construct a $componentName", e)
   }
   protected var listeningForData = true
-  // def listening = listeningForData
 
   def mainLoop: Unit = component.foreach { c =>
     advertizeComponent(c)
