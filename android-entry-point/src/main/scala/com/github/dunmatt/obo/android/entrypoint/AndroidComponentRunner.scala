@@ -18,7 +18,7 @@ class AndroidComponentRunner(componentName: String)(implicit context: Context) e
   protected val component = constructComponent(componentName)
   component match {
     case Success(c) =>
-      val ncf =  new NsdConnectionFactory(nsdManager)
+      val ncf =  new NsdConnectionFactory(nsdManager)(zctx)
       c.connectionFactory = ncf
       c.serialPortFactory = new AndroidSerialPortFactory(context, zctx)
       nsdManager.discoverServices(Constants.DNSSD_SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, ncf)

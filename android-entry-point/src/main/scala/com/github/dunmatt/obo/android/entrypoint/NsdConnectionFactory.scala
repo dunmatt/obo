@@ -8,8 +8,8 @@ import org.zeromq.ZMQ
 import scala.concurrent.{ Future, Promise }
 import scala.util.Try
 
-class NsdConnectionFactory(nsdManager: NsdManager) extends ConnectionFactory
-                                                   with NsdManager.DiscoveryListener {
+class NsdConnectionFactory(nsdManager: NsdManager)(implicit val zctx: ZMQ.Context)
+      extends ConnectionFactory with NsdManager.DiscoveryListener {
   private val log = LoggerFactory.getLogger(getClass)
   private var pendingConnections = Set.empty[(OboIdentifier, Promise[Connection])]
   private var services = Set.empty[NsdServiceInfo]

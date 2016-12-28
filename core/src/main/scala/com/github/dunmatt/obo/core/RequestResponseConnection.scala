@@ -8,10 +8,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{ Failure, Success, Try }
 import zmq.ZMQ.ZMQ_SNDMORE
 
-class RequestResponseConnection(url: String) extends Connection {
+class RequestResponseConnection(url: String)(implicit val zctx: ZMQ.Context) extends Connection {
   import RequestResponseConnection._
   private val log = LoggerFactory.getLogger(getClass)
-  private val socket = ZMQ.context(1).socket(ZMQ.REQ)  // TODO: this context be an implicit param
+  private val socket = zctx.socket(ZMQ.REQ)
   private val metaMessageFactory = new MetaMessageFactory
   private var factoryCache = Map.empty[String, MessageFactory[_ <: Message[_]]]
   socket.connect(url)
