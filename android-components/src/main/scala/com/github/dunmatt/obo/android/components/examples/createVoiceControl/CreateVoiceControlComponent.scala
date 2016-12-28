@@ -43,6 +43,7 @@ class CreateVoiceControlComponent extends AndroidComponent {
           case e: Throwable => log.error(s"Closing command forwarding due to $e ", e)
         } finally {
           createComponentConnection.foreach(_.close)
+          log.info("Closed connection to CreateComponent")
         }
       }
     }).start

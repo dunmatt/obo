@@ -6,6 +6,7 @@
   <uses-permission android:name="android.permission.RECORD_AUDIO" />
   <application>
     <activity android:name=".examples.createVoiceControl.VoiceControlActivity"
+              android:excludeFromRecents="true"
               android:taskAffinity=""
               android:launchMode="singleTask"/>
   </application>

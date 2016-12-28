@@ -19,8 +19,8 @@ trait AndroidComponent extends Component {
       stackBuilder.addNextIntent(intent)
       val pending = stackBuilder.getPendingIntent(shortId, PendingIntent.FLAG_UPDATE_CURRENT)
       val notification = new Notification.Builder(context)
-                                         .setContentTitle(name)
-                                         .setContentText("Go to the component UI")
+                                         .setContentTitle(cls.getSimpleName)
+                                         .setContentText(s"Go to the UI for $name")
                                          .setSmallIcon(R.drawable.scala_android)
                                          .setContentIntent(pending)
                                          .build
@@ -30,6 +30,8 @@ trait AndroidComponent extends Component {
         case Some(_) => log.error("This should be impossible, getSystemService returned a different type than was requested")
         case None => log.error("Couldn't get the notification service... are you running an ancient version of android?")
       }
+      // start the activity for good measure
+      // context.startActivity(intent)
     }
   }
 
