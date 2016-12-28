@@ -3,11 +3,12 @@ package com.github.dunmatt.obo.jvm
 import com.github.dunmatt.obo.core.{ Connection, ConnectionFactory, Constants, OboIdentifier, RequestResponseConnection }
 import javax.jmdns.{ JmDNS, ServiceEvent, ServiceInfo, ServiceListener }
 import org.slf4j.LoggerFactory
+import org.zeromq.ZMQ
 import scala.concurrent.{ Future, Promise }
 import scala.util.Try
 
 // TODO: write a generic wrapper interface for Service Infos and push most of this into ConnectionFactory
-class JmDnsConnectionFactory(dnssd: JmDNS) extends ConnectionFactory with ServiceListener {
+class JmDnsConnectionFactory(dnssd: JmDNS)(implicit zctx: ZMQ.Context) extends ConnectionFactory with ServiceListener {
   protected val log = LoggerFactory.getLogger(getClass)
   private var pendingConnections = Set.empty[(OboIdentifier, Promise[Connection])]
   private var services = Set.empty[ServiceInfo]

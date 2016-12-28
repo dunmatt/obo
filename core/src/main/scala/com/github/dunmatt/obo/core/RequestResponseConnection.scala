@@ -70,6 +70,12 @@ class RequestResponseConnection(url: String)(implicit val zctx: ZMQ.Context) ext
     }
     factoryCache(factoryName).unpack(new MsgReader(socket.recv(0)))
   }
+
+  override def close {
+    super.close
+    log.info(s"Closing connection to $url")
+    socket.close
+  }
 }
 
 object RequestResponseConnection {

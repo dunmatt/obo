@@ -10,7 +10,8 @@ import scala.util.{ Failure, Success, Try }
 
 class JvmComponentRunner(component: Class[_]) extends ComponentRunner {
   protected val log = LoggerFactory.getLogger(getClass)
-  protected val socket = ZMQ.context(1).socket(ZMQ.REP)
+  protected implicit val zctx = ZMQ.context(1)
+  protected val socket = zctx.socket(ZMQ.REP)
   protected val port = socket.bindToRandomPort("tcp://*")
   protected val dnssd = JmDNS.create
   protected var listeningForData = false

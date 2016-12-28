@@ -14,7 +14,7 @@ class AndroidComponentRunner(componentName: String)(implicit context: Context) e
   protected val zctx = ZMQ.context(1)
   protected val socket = zctx.socket(ZMQ.REP)
   protected val port = socket.bindToRandomPort("tcp://*")
-  protected val nsdManager = context.getSystemService(classOf[NsdManager])  // TODO: can this fail?  Should it be wrapped in a monad?
+  protected val nsdManager = context.getSystemService(classOf[NsdManager])
   protected val component = constructComponent(componentName)
   component match {
     case Success(c) =>
@@ -62,7 +62,6 @@ class AndroidComponentRunner(componentName: String)(implicit context: Context) e
 
   private val registrationListener = new NsdManager.RegistrationListener {
     override def onServiceRegistered(info: NsdServiceInfo): Unit = {
-      // TODO: consider storing the service name since the assigned name might not equal the requested one
       log.info(s"Successfully registered ${info.getServiceName} with DNS-SD.")
     }
     override def onRegistrationFailed(info: NsdServiceInfo, err: Int): Unit = {

@@ -40,7 +40,6 @@ lazy val components = (project in file("components"))
 lazy val androidComponents = (project in file("android-components"))
   .dependsOn(core, messages, utils)
   .enablePlugins(AndroidLib)
-  // .settings(android.Plugin.androidBuildAar: _*)
   .settings(commonSettings: _*)
   .settings(androidSettings: _*)
   .settings(exportJars := true)
@@ -52,12 +51,9 @@ lazy val jvmComponents = (project in file("jvm-components"))
 
 lazy val androidEntryPoint = (project in file("android-entry-point"))
   .dependsOn(core, components, androidComponents, utils)
-  // .dependsOn(core, components, utils)
-  // .androidBuildWith(androidComponents)
   .enablePlugins(AndroidApp, SpiPlugin)
   .settings(commonSettings: _*)
   .settings(androidSettings: _*)
-  // .settings()
   .settings(resourceGenerators in Compile += Def.task{
     // This task copies the list of Components to the appropriate place to ensure
     // it gets included in an accessible place in the APK
