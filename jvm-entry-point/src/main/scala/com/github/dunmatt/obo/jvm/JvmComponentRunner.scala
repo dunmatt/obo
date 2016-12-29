@@ -3,13 +3,11 @@ package com.github.dunmatt.obo.jvm
 import com.github.dunmatt.obo.core.{ Component, ComponentRunner, Constants }
 import com.github.dunmatt.obo.jvm.serial.RxtxSerialPortFactory
 import javax.jmdns.{ JmDNS, ServiceInfo }
-import org.slf4j.LoggerFactory
 import org.zeromq.ZMQ
 import scala.collection.JavaConversions._
 import scala.util.{ Failure, Success, Try }
 
 class JvmComponentRunner(component: Class[_]) extends ComponentRunner {
-  protected val log = LoggerFactory.getLogger(getClass)
   protected implicit val zctx = ZMQ.context(1)
   protected val socket = zctx.socket(ZMQ.REP)
   protected val port = socket.bindToRandomPort("tcp://*")
@@ -23,21 +21,21 @@ class JvmComponentRunner(component: Class[_]) extends ComponentRunner {
                                  , "The main Obo RPC interface, send your semantic queries here!")
     info.setText(Map((Constants.COMPONENT_NAME_KEY, name)))  // why this method is called setText is beyond me... probably beyond explanation in the mortal realm
     dnssd.registerService(info)
-    log.info(s"Advertizing service $info")
+    // log.info(s"Advertizing service $info")
   }
 
   def go: Unit = constructComponent(component).map { c =>
-    c.connectionFactory = new JmDnsConnectionFactory(dnssd)
+    c.connectionFactory = new JmDnsConnectionFactory(dnssd, c.log)
     c.serialPortFactory = new RxtxSerialPortFactory
     advertizeComponent(c.name)
     listeningForData = true
     mainLoop(c)
   }
 
-  def halt: Unit = {
+  def stop: Unit = {
     listeningForData = false
     dnssd.unregisterAllServices
-    log.info("Halting...")
+    // log.info("Halting...")
     socket.close
   }
 }

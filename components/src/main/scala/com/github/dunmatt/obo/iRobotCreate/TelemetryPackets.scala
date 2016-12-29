@@ -1,6 +1,5 @@
 package com.github.dunmatt.obo.iRobotCreate
 
-import org.slf4j.LoggerFactory
 import squants.electro.{ ElectricCharge, ElectricCurrent, ElectricPotential }
 import squants.motion.Velocity
 import squants.space.{ Angle, Length }

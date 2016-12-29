@@ -2,7 +2,6 @@ package com.github.dunmatt.obo.jvm
 
 import com.github.dunmatt.obo.core.{ Component, Message, OboIdentifier }
 import com.github.dunmatt.obo.core.msgpack.{ MsgBuilder, MsgReader }
-import org.slf4j.LoggerFactory
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class ScratchpadComponent extends Component {

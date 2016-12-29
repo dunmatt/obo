@@ -8,10 +8,10 @@ import zmq.ZMQ.ZMQ_SNDMORE  // I can't help but wonder if this has anything to d
 
 trait ComponentRunner {
   import ComponentRunner._
-  protected def log: Logger
   protected def socket: ZMQ.Socket
   protected def listeningForData: Boolean
   protected val metaMessageFactory = new MetaMessageFactory
+  private val logName = classOf[ComponentRunner].getName
   private var factoryCache = Map.empty[String, MessageFactory[_ <: Message[_]]]
 
   protected def constructComponent(className: String): Try[Component] = {
@@ -51,7 +51,7 @@ trait ComponentRunner {
   protected def handleReceivedMessage(m: Try[Message[_]], component: Component): Unit = m match {
     case Success(msg) => handleReceivedMessage(msg, component)
     case Failure(e) =>
-      log.error(s"Couldn't receive or parse main message, failed with: ", e)
+      component.log.error(logName, s"Couldn't receive or parse main message, failed with: ", e)
       abortRecv
   }
 
@@ -59,7 +59,7 @@ trait ComponentRunner {
     metaMessageFactory.unpack(new MsgReader(bytes)) match {
       case Success(meta) => handleReceivedMessage(receiveMessage(meta.factoryClassName), component)
       case Failure(e) =>
-        log.error(s"Couldn't parse [${bytes.mkString(",")}] as a MetaMessage.", e)
+        component.log.error(logName, s"Couldn't parse [${bytes.mkString(",")}] as a MetaMessage.", e)
         abortRecv
     }
   }
@@ -81,7 +81,7 @@ trait ComponentRunner {
         }
       }
     } catch {
-      case e: Throwable => log.error("Encountered an error while recv-ing: ", e)
+      case e: Throwable => component.log.error(logName, "Encountered an error while recv-ing: ", e)
     }
     component.onHalt
   }
@@ -89,7 +89,7 @@ trait ComponentRunner {
   protected def handleMessageInternally(msg: Message[_]): Option[Message[_]] = msg match {
     // TODO: respond to some message types here
     case _ =>
-      log.debug(s"Got message $msg")
+      // log.debug(s"Got message $msg")
       None
   }
 }

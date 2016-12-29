@@ -3,7 +3,6 @@ package com.github.dunmatt.obo.iRobotCreate
 import com.github.dunmatt.obo.core.{ Component, Message }
 import com.github.dunmatt.obo.core.serial.{ SerialPort, SerialPortRequest }
 import com.github.dunmatt.obo.utils.implicits.QuantityRangeImprovements._
-import org.slf4j.LoggerFactory
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ Await, Future, Promise }
 import scala.concurrent.duration.Duration
@@ -16,7 +15,6 @@ import squants.space.LengthConversions._
 
 class CreateComponent extends Component {
   import CreateComponent._
-  // val log = LoggerFactory.getLogger(getClass)
   private val portP = Promise[SerialPort]
   val port = portP.future
   val toRobot = port.map(_.getOutputStream)

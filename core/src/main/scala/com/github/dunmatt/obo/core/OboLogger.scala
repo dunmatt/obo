@@ -9,9 +9,11 @@ class OboLogger(basis: Logger) extends Logger {
   private val loggingSocket = ZMQ.context(1).socket(ZMQ.PUB)
   val loggingPort = loggingSocket.bindToRandomPort("tcp://*")
 
-  protected def publish(level: Level, msg: String) = {
+  protected def publish(level: Level, msg: String): Unit = publish(getName, level, msg)
+
+  protected def publish(name: String, level: Level, msg: String): Unit = {
     if (isLevelEnabled(level)) {
-      val entry = LogEntry(getName, level, Instant.now, msg)
+      val entry = LogEntry(name, level, Instant.now, msg)
       loggingSocket.send(entry.getBytes)
     }
   }
@@ -37,6 +39,31 @@ class OboLogger(basis: Logger) extends Logger {
   def isTraceEnabled(m: Marker) = basis.isTraceEnabled(m)
   def isWarnEnabled             = basis.isWarnEnabled
   def isWarnEnabled(m: Marker)  = basis.isWarnEnabled(m)
+
+  def debug(name: String, msg: String): Unit = {
+    publish(name, Level.DEBUG, msg)
+    basis.debug(msg)
+  }
+
+  def error(name: String, msg: String): Unit = {
+    publish(name, Level.ERROR, msg)
+    basis.error(msg)
+  }
+
+  def info(name: String, msg: String): Unit = {
+    publish(name, Level.INFO, msg)
+    basis.info(msg)
+  }
+
+  def trace(name: String, msg: String): Unit = {
+    publish(name, Level.TRACE, msg)
+    basis.trace(msg)
+  }
+
+  def warn(name: String, msg: String): Unit = {
+    publish(name, Level.WARN, msg)
+    basis.warn(msg)
+  }
 
   def debug(m: Marker, msg: String): Unit = {
     publish(Level.DEBUG, msg)

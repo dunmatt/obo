@@ -1,34 +1,33 @@
 package com.github.dunmatt.obo.core
 
 import com.github.dunmatt.obo.core.msgpack.MsgReader
-import org.slf4j.LoggerFactory
 import org.zeromq.ZMQ
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{ Failure, Success, Try }
 import zmq.ZMQ.ZMQ_SNDMORE
 
-class RequestResponseConnection(url: String)(implicit val zctx: ZMQ.Context) extends Connection {
+class RequestResponseConnection(url: String, log: OboLogger)(implicit val zctx: ZMQ.Context) extends Connection {
   import RequestResponseConnection._
-  private val log = LoggerFactory.getLogger(getClass)
+  private val logName = classOf[RequestResponseConnection].getName
   private val socket = zctx.socket(ZMQ.REQ)
   private val metaMessageFactory = new MetaMessageFactory
   private var factoryCache = Map.empty[String, MessageFactory[_ <: Message[_]]]
   socket.connect(url)
-  log.info(s"Connected to $url")
+  log.info(logName, s"Connected to $url")
   
   def send(msg: Message[_]): Future[Option[Message[_]]] = {
     Future {
       socket.synchronized {
-        // log.debug(s"""About to send $msg (${msg.getBytes.mkString(", ")})""")
+        // log.debug(logName, s"""About to send $msg (${msg.getBytes.mkString(", ")})""")
         socket.send(MetaMessage(msg.factory.getName).getBytes, ZMQ_SNDMORE)
         socket.send(msg.getBytes)
-        log.debug(s"Sent $msg")
+        log.debug(logName, s"Sent $msg")
         // TODO: put a timeout here
         val reply = socket.recv(0)
         reply.toSeq match {  // TODO: possible null ref here, fix it!!
           case ACK => None  // this is fine, there was just no response
-          case NACK => log.warn("Got a NACK back, connection may be in a weird state."); None
+          case NACK => log.warn(logName, "Got a NACK back, connection may be in a weird state."); None
           case _ => handleReceivedMetaBytes(reply)
         }
       }
@@ -39,7 +38,7 @@ class RequestResponseConnection(url: String)(implicit val zctx: ZMQ.Context) ext
     metaMessageFactory.unpack(new MsgReader(bytes)) match {
       case Success(meta) => handleReceivedMessage(receiveMessage(meta.factoryClassName))
       case Failure(e) =>
-        log.error(s"Couldn't parse [${bytes.mkString(",")}] as a MetaMessage.", e)
+        log.error(logName, s"Couldn't parse [${bytes.mkString(",")}] as a MetaMessage.", e)
         abortRecv
     }
   }
@@ -47,7 +46,7 @@ class RequestResponseConnection(url: String)(implicit val zctx: ZMQ.Context) ext
   private def handleReceivedMessage(m: Try[Message[_]]): Option[Message[_]] = m match {
     case Success(msg) => m.toOption
     case Failure(e) =>
-      log.error(s"Couldn't receive or parse main message, failed with: ", e)
+      log.error(logName, s"Couldn't receive or parse main message, failed with: ", e)
       abortRecv
   }
 
@@ -73,7 +72,7 @@ class RequestResponseConnection(url: String)(implicit val zctx: ZMQ.Context) ext
 
   override def close {
     super.close
-    log.info(s"Closing connection to $url")
+    log.info(logName, s"Closing connection to $url")
     socket.close
   }
 }

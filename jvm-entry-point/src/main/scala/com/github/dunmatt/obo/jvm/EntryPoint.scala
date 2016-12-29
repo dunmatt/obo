@@ -27,7 +27,7 @@ object EntryPoint {
     val mainThread = Thread.currentThread
     Runtime.getRuntime.addShutdownHook(new Thread() {override def run = {
       log.info("Shutdown hook triggered.")
-      runner.halt
+      runner.stop
       mainThread.join
     }})
     runner.go

@@ -2,20 +2,19 @@ package com.github.dunmatt.obo.android.entrypoint
 
 import android.content.Context
 import android.net.nsd.{ NsdManager, NsdServiceInfo }
-import com.github.dunmatt.obo.core.{ Connection, ConnectionFactory, Constants, OboIdentifier, RequestResponseConnection }
-import org.slf4j.LoggerFactory
+import com.github.dunmatt.obo.core.{ Connection, ConnectionFactory, Constants, OboIdentifier, OboLogger, RequestResponseConnection }
 import org.zeromq.ZMQ
 import scala.concurrent.{ Future, Promise }
 import scala.util.Try
 
-class NsdConnectionFactory(nsdManager: NsdManager)(implicit val zctx: ZMQ.Context)
+class NsdConnectionFactory(nsdManager: NsdManager, log: OboLogger)(implicit val zctx: ZMQ.Context)
       extends ConnectionFactory with NsdManager.DiscoveryListener {
-  private val log = LoggerFactory.getLogger(getClass)
+  private val logName = classOf[NsdConnectionFactory].getName
   private var pendingConnections = Set.empty[(OboIdentifier, Promise[Connection])]
   private var services = Set.empty[NsdServiceInfo]
 
   def connectTo(oi: OboIdentifier): Future[Connection] = {
-    log.info(s"Looking for $oi")
+    log.info(logName, s"Looking for $oi")
     val p = Promise[Connection]
     pendingConnections = pendingConnections + ((oi, p))
     alertPendingConnections
@@ -23,14 +22,14 @@ class NsdConnectionFactory(nsdManager: NsdManager)(implicit val zctx: ZMQ.Contex
   }
 
   protected def connect(info: NsdServiceInfo, p: Promise[Connection]): Unit = {
-    log.info(s"Connecting to ${info.getServiceName} (${info.getHost})")
+    log.info(logName, s"Connecting to ${info.getServiceName} (${info.getHost})")
     val url = s"tcp:/${info.getHost}:${info.getPort}"  // not a typo, the second slash comes from NSD (for some reason)
-    val conn = Try(new RequestResponseConnection(url))
+    val conn = Try(new RequestResponseConnection(url, log))
     p.complete(conn)
   }
 
   override def onDiscoveryStarted(regType: String): Unit = {
-    log.info("NSD based Obo service discovery started.")
+    log.info(logName, "NSD based Obo service discovery started.")
   }
 
   protected def satisfiesIdentifier(oi: OboIdentifier, info: NsdServiceInfo): Boolean = {
@@ -52,12 +51,12 @@ class NsdConnectionFactory(nsdManager: NsdManager)(implicit val zctx: ZMQ.Contex
     if (service.getServiceType == Constants.DNSSD_SERVICE_TYPE) {
       nsdManager.resolveService(service, new NsdManager.ResolveListener {
         override def onServiceResolved(info: NsdServiceInfo): Unit = {
-          log.info(s"found $info")
+          log.info(logName, s"found $info")
           services = services + info
           alertPendingConnections
         }
         override def onResolveFailed(info: NsdServiceInfo, err: Int): Unit = {
-          log.error(s"Couldn't resolve service, error code $err.")
+          log.error(logName, s"Couldn't resolve service, error code $err.")
         }
       })
     }
@@ -68,16 +67,16 @@ class NsdConnectionFactory(nsdManager: NsdManager)(implicit val zctx: ZMQ.Contex
   }
 
   override def onDiscoveryStopped(servType: String): Unit = {
-    log.info("NSD service discovery stopped.")
+    log.info(logName, "NSD service discovery stopped.")
   }
 
   override def onStartDiscoveryFailed(servType: String, err: Int): Unit = {
-    log.error(s"Discovery failed due with error code: $err")
+    log.error(logName, s"Discovery failed due with error code: $err")
     nsdManager.stopServiceDiscovery(this)
   }
 
   override def onStopDiscoveryFailed(servType: String, err: Int): Unit = {
-    log.error(s"Discovery failed due with error code: $err")
+    log.error(logName, s"Discovery failed due with error code: $err")
   }
 }
 
