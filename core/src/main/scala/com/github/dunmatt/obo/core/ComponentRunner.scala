@@ -8,8 +8,11 @@ import zmq.ZMQ.ZMQ_SNDMORE  // I can't help but wonder if this has anything to d
 
 trait ComponentRunner {
   import ComponentRunner._
-  protected def socket: ZMQ.Socket
   protected def listeningForData: Boolean
+
+  implicit protected val zctx = ZMQ.context(1)
+  protected val serviceSocket = zctx.socket(ZMQ.REP)
+  protected val servicePort = serviceSocket.bindToRandomPort("tcp://*")
   protected val metaMessageFactory = new MetaMessageFactory
   private val logName = classOf[ComponentRunner].getName
   private var factoryCache = Map.empty[String, MessageFactory[_ <: Message[_]]]
@@ -36,15 +39,15 @@ trait ComponentRunner {
     if (!factoryCache.contains(factoryName)) {
       factoryCache = factoryCache + ((factoryName -> makeFactory(factoryName)))
     }
-    factoryCache(factoryName).unpack(new MsgReader(socket.recv(0)))
+    factoryCache(factoryName).unpack(new MsgReader(serviceSocket.recv(0)))
   }
 
   protected def handleReceivedMessage(msg: Message[_], component: Component): Unit = {
     handleMessageInternally(msg).orElse(component.handleMessage(msg)) match {
       case Some(reply) =>
-        socket.send(MetaMessage(reply.factory.getName).getBytes, ZMQ_SNDMORE)
-        socket.send(reply.getBytes, 0)
-      case None => socket.send(ACK)
+        serviceSocket.send(MetaMessage(reply.factory.getName).getBytes, ZMQ_SNDMORE)
+        serviceSocket.send(reply.getBytes, 0)
+      case None => serviceSocket.send(ACK)
     }
   }
 
@@ -65,17 +68,17 @@ trait ComponentRunner {
   }
 
   protected def abortRecv: Unit = {
-    while (socket.hasReceiveMore) {
-      socket.recv
+    while (serviceSocket.hasReceiveMore) {
+      serviceSocket.recv
     }
-    socket.send(NACK)
+    serviceSocket.send(NACK)
   }
 
   protected def mainLoop(component: Component): Unit = {
     component.onStart
     try {
       while (listeningForData) {
-        socket.recv(ZMQ.NOBLOCK) match {
+        serviceSocket.recv(ZMQ.NOBLOCK) match {
           case null => Thread.sleep(50)  // ms
           case bytes => handleReceivedMetaBytes(bytes, component)
         }
@@ -91,6 +94,10 @@ trait ComponentRunner {
     case _ =>
       // log.debug(s"Got message $msg")
       None
+  }
+
+  def stop: Unit = {
+    serviceSocket.close
   }
 }
 

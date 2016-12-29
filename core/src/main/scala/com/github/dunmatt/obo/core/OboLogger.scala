@@ -14,6 +14,7 @@ class OboLogger(basis: Logger) extends Logger {
   protected def publish(name: String, level: Level, msg: String): Unit = {
     if (isLevelEnabled(level)) {
       val entry = LogEntry(name, level, Instant.now, msg)
+      // TODO: should we break this into a multipart message to aide with filtering?
       loggingSocket.send(entry.getBytes)
     }
   }

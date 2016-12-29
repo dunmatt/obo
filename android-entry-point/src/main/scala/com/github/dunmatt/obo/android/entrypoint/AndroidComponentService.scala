@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory
 import scala.collection.JavaConversions._
 
 class AndroidComponentService extends Service {
+  import AndroidComponentService._
   implicit val context: Context = this
   protected val log = LoggerFactory.getLogger(getClass)
   protected val activeRunners = new ConcurrentHashMap[String, AndroidComponentRunner]
@@ -30,7 +31,6 @@ class AndroidComponentService extends Service {
     Service.START_REDELIVER_INTENT
   }
 
-  // TODO: are we sure we want to reject bind requests?
   override def onBind(intent: Intent) = null  // this null tells Android to reject bind requests
 
   override def onCreate: Unit = {
@@ -39,8 +39,12 @@ class AndroidComponentService extends Service {
 
   override def onDestroy: Unit = {
     log.info("Stopping all component runners...")
-    activeRunners.values.foreach(_.stop)
-    activeRunners.clear
+    new Thread(new Runnable {
+      override def run: Unit = {
+        activeRunners.values.foreach(_.stop)
+        activeRunners.clear
+      }
+    }).start
   }
 
   protected def promoteServiceToForeground: Unit = {
@@ -53,8 +57,11 @@ class AndroidComponentService extends Service {
                                        .setCategory(Notification.CATEGORY_SERVICE)
                                        .setContentIntent(pending)
                                        .build
-    // TODO: figure out what that the int (5, below) is for and replace it with something useful
-    startForeground(5, notification)
+    startForeground(NOTIFICATION_ID, notification)
   }
+}
+
+object AndroidComponentService {
+  val NOTIFICATION_ID = 5  // could be anything but zero
 }
 

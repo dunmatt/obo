@@ -32,7 +32,7 @@ class JmDnsConnectionFactory(dnssd: JmDNS, log: OboLogger)(implicit zctx: ZMQ.Co
     oi.refersToServiceNamed(info.getPropertyString(Constants.COMPONENT_NAME_KEY))
   }
 
-  override def serviceAdded(x: ServiceEvent) = log.debug(logName, s"Heard about $x.")  // TODO: perhaps print getPropertyString(Constants.COMPONENT_NAME_KEY) instead of the whole object
+  override def serviceAdded(x: ServiceEvent) = log.debug(logName, s"Heard about $x.")
   
   override def serviceRemoved(x: ServiceEvent) = {
     log.debug(logName, s"$x is no longer available.")

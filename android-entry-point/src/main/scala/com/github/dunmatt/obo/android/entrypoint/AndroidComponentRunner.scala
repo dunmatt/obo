@@ -10,16 +10,13 @@ import org.zeromq.ZMQ
 import scala.util.{ Failure, Success }
 
 class AndroidComponentRunner(componentName: String)(implicit context: Context) extends ComponentRunner {
-  protected val logName = classOf[AndroidComponentRunner].getName
+  private val logName = classOf[AndroidComponentRunner].getName
   protected val backupLog = LoggerFactory.getLogger(getClass)
-  protected val zctx = ZMQ.context(1)
-  protected val socket = zctx.socket(ZMQ.REP)
-  protected val port = socket.bindToRandomPort("tcp://*")
   protected val nsdManager = context.getSystemService(classOf[NsdManager])
   protected val component = constructComponent(componentName)
   component match {
     case Success(c) =>
-      val ncf =  new NsdConnectionFactory(nsdManager, c.log)(zctx)
+      val ncf =  new NsdConnectionFactory(nsdManager, c.log)
       c.connectionFactory = ncf
       c.serialPortFactory = new AndroidSerialPortFactory(context, zctx)
       nsdManager.discoverServices(Constants.DNSSD_SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, ncf)
@@ -43,25 +40,21 @@ class AndroidComponentRunner(componentName: String)(implicit context: Context) e
     info.setServiceType(Constants.DNSSD_SERVICE_TYPE)
     info.setAttribute(Constants.COMPONENT_NAME_KEY, c.name)
     info.setAttribute(Constants.LOG_PORT_KEY, c.log.loggingPort.toString)
-    info.setPort(port)
+    info.setPort(servicePort)
     c.log.info(logName, s"Now advertizing $info via DNS-SD")
     nsdManager.registerService(info, NsdManager.PROTOCOL_DNS_SD, registrationListener)
   }
 
-  def stop: Unit = {
+  override def stop: Unit = {
     listeningForData = false
-    new Thread (new Runnable {
-      override def run: Unit = {
-        nsdManager.unregisterService(registrationListener)
-        component.foreach (c =>
-          c.connectionFactory match {
-            case listener: NsdManager.DiscoveryListener => nsdManager.stopServiceDiscovery(listener)
-            case _ => c.log.error(logName, "The component's connection factory no longer implements DiscoveryListener, fix AndroidComponentRunner!")
-          }
-        )
-        socket.close
+    nsdManager.unregisterService(registrationListener)
+    component.foreach { c =>
+      c.connectionFactory match {
+        case listener: NsdManager.DiscoveryListener => nsdManager.stopServiceDiscovery(listener)
+        case _ => c.log.error(logName, "The component's connection factory no longer implements DiscoveryListener, fix AndroidComponentRunner!")
       }
-    }).start
+    }
+    super.stop
   }
 
   private val registrationListener = new NsdManager.RegistrationListener {

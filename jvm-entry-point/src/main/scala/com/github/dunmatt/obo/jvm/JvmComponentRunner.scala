@@ -9,16 +9,13 @@ import scala.util.{ Failure, Success, Try }
 
 class JvmComponentRunner(component: Class[_]) extends ComponentRunner {
   protected val logName = classOf[JvmComponentRunner].getName
-  protected implicit val zctx = ZMQ.context(1)
-  protected val socket = zctx.socket(ZMQ.REP)
-  protected val port = socket.bindToRandomPort("tcp://*")
   protected val dnssd = JmDNS.create
   protected var listeningForData = false
 
   protected def advertizeComponent(c: Component): Unit = {
     val info = ServiceInfo.create( Constants.DNSSD_SERVICE_TYPE
                                  , Constants.RPC_SERVICE_DNSSD_NAME
-                                 , port
+                                 , servicePort
                                  , "The main Obo RPC interface, send your semantic queries here!")
     // why this method is called setText is beyond me... probably beyond explanation in the mortal realm
     info.setText(Map( Constants.COMPONENT_NAME_KEY -> c.name
@@ -35,9 +32,9 @@ class JvmComponentRunner(component: Class[_]) extends ComponentRunner {
     mainLoop(c)
   }
 
-  def stop: Unit = {
+  override def stop: Unit = {
     listeningForData = false
     dnssd.unregisterAllServices
-    socket.close
+    super.stop
   }
 }

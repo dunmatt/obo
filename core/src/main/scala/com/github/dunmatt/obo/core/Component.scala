@@ -7,7 +7,7 @@ import scala.concurrent.Future
 
 trait Component {
   val log = new OboLogger(LoggerFactory.getLogger(getClass))
-  final val instanceId = UUID.randomUUID
+  val instanceId = UUID.randomUUID
   final val shortId = instanceId.getLeastSignificantBits.toInt
   var connectionFactory: ConnectionFactory = null  // this is populated by the runner
   var serialPortFactory: SerialPortFactory = null  // this is populated by the runner
