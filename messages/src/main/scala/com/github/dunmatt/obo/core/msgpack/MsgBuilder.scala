@@ -1,6 +1,7 @@
 package com.github.dunmatt.obo.core.msgpack
 
 import com.github.dunmatt.obo.core.Message
+import java.lang.Enum
 import java.nio.{ ByteBuffer, ByteOrder }
 
 class MsgBuilder {
@@ -11,6 +12,8 @@ class MsgBuilder {
   def putBlob(b: ByteBuffer): MsgBuilder = { addField(BlobField(b)); this }
 
   def putBoolean(b: Boolean): MsgBuilder = { addField(BooleanField(b)); this }
+
+  def putEnum[E <: Enum[E]](e: E): MsgBuilder = { addField(StringField(e.name)); this }
 
   def putFloat(d: Double): MsgBuilder = { addField(DoubleField(d)); this }
 

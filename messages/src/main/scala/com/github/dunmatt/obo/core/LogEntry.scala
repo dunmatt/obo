@@ -13,7 +13,7 @@ case class LogEntry( name: String
   def factory = classOf[LogEntryFactory]
 
   def getBytes: Array[Byte] = (new MsgBuilder).putString(name)
-                                              .putInt(level.toInt)
+                                              .putInt(level.ordinal)
                                               .putInt(timestamp.getMillis)
                                               .putString(message)
                                               .getBytes

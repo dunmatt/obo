@@ -2,6 +2,7 @@ package com.github.dunmatt.obo.core.msgpack
 
 import com.github.dunmatt.obo.core.Message
 import com.github.dunmatt.obo.utils.implicits.ByteBufferEnhancements._
+import java.lang.Enum
 import java.nio.{ ByteBuffer, ByteOrder }
 import scala.util.{ Failure, Success, Try }
 
@@ -23,6 +24,15 @@ class MsgReader(private val data: ByteBuffer) {
   def getOptionalBoolean(field: Int): Try[Option[Boolean]] = data.get(map(field)) match {
     case NIL => Try(None)
     case _ => getBoolean(field).map(Option.apply)
+  }
+
+  def getEnum[E <: Enum[E]](field: Int, cls: Class[E]): Try[E] = {
+    getString(field).map(n => Enum.valueOf(cls, n))
+  }
+
+  def getOptionalEnum[E <: Enum[E]](field: Int, cls: Class[E]): Try[Option[E]] = data.get(map(field)) match {
+    case NIL => Try(None)
+    case _ => getEnum(field, cls).map(Option.apply)
   }
 
   def getFloat(field: Int): Try[Double] = data.get(map(field)) match {
