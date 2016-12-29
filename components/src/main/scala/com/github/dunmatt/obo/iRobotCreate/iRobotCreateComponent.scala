@@ -16,7 +16,7 @@ import squants.space.LengthConversions._
 
 class CreateComponent extends Component {
   import CreateComponent._
-  val log = LoggerFactory.getLogger(getClass)
+  // val log = LoggerFactory.getLogger(getClass)
   private val portP = Promise[SerialPort]
   val port = portP.future
   val toRobot = port.map(_.getOutputStream)

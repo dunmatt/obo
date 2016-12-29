@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class ScratchpadComponent extends Component {
-  val log = LoggerFactory.getLogger(getClass)
   private var sendPings = true
 
   override def onStart = {

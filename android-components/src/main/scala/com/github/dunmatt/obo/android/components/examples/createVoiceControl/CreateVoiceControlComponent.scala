@@ -4,7 +4,6 @@ import android.widget.Toast
 import com.github.dunmatt.obo.core.{ Connection, Message, OboIdentifier }
 import com.github.dunmatt.obo.iRobotCreate.{ DriveStraight, Stop, TurnInPlace }
 import com.github.dunmatt.obo.android.core.AndroidComponent
-import org.slf4j.LoggerFactory
 import org.zeromq.ZMQ
 import scala.concurrent.{ Await, Future, Promise }
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -14,7 +13,6 @@ import squants.motion.VelocityConversions._
 
 class CreateVoiceControlComponent extends AndroidComponent {
   import CreateVoiceControlComponent._
-  val log = LoggerFactory.getLogger(getClass)
   override val uiActivityClass = Some(classOf[VoiceControlActivity])
   private val activitySocket = zctx.socket(ZMQ.SUB)
   private val killActivity = zctx.socket(ZMQ.PUB)
