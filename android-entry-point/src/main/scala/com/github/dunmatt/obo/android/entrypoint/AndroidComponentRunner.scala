@@ -42,6 +42,7 @@ class AndroidComponentRunner(componentName: String)(implicit context: Context) e
     info.setServiceName(Constants.RPC_SERVICE_DNSSD_NAME)
     info.setServiceType(Constants.DNSSD_SERVICE_TYPE)
     info.setAttribute(Constants.COMPONENT_NAME_KEY, c.name)
+    info.setAttribute(Constants.LOG_PORT_KEY, c.log.loggingPort.toString)
     info.setPort(port)
     c.log.info(logName, s"Now advertizing $info via DNS-SD")
     nsdManager.registerService(info, NsdManager.PROTOCOL_DNS_SD, registrationListener)

@@ -8,26 +8,29 @@ import scala.collection.JavaConversions._
 import scala.util.{ Failure, Success, Try }
 
 class JvmComponentRunner(component: Class[_]) extends ComponentRunner {
+  protected val logName = classOf[JvmComponentRunner].getName
   protected implicit val zctx = ZMQ.context(1)
   protected val socket = zctx.socket(ZMQ.REP)
   protected val port = socket.bindToRandomPort("tcp://*")
   protected val dnssd = JmDNS.create
   protected var listeningForData = false
 
-  protected def advertizeComponent(name: String): Unit = {
+  protected def advertizeComponent(c: Component): Unit = {
     val info = ServiceInfo.create( Constants.DNSSD_SERVICE_TYPE
                                  , Constants.RPC_SERVICE_DNSSD_NAME
                                  , port
                                  , "The main Obo RPC interface, send your semantic queries here!")
-    info.setText(Map((Constants.COMPONENT_NAME_KEY, name)))  // why this method is called setText is beyond me... probably beyond explanation in the mortal realm
+    // why this method is called setText is beyond me... probably beyond explanation in the mortal realm
+    info.setText(Map( Constants.COMPONENT_NAME_KEY -> c.name
+                    , Constants.LOG_PORT_KEY       -> c.log.loggingPort.toString))
+    c.log.info(logName, s"Now advertizing $info via DNS-SD")
     dnssd.registerService(info)
-    // log.info(s"Advertizing service $info")
   }
 
   def go: Unit = constructComponent(component).map { c =>
     c.connectionFactory = new JmDnsConnectionFactory(dnssd, c.log)
     c.serialPortFactory = new RxtxSerialPortFactory
-    advertizeComponent(c.name)
+    advertizeComponent(c)
     listeningForData = true
     mainLoop(c)
   }
@@ -35,7 +38,6 @@ class JvmComponentRunner(component: Class[_]) extends ComponentRunner {
   def stop: Unit = {
     listeningForData = false
     dnssd.unregisterAllServices
-    // log.info("Halting...")
     socket.close
   }
 }
