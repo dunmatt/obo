@@ -14,15 +14,15 @@ class AndroidComponentRunner(componentName: String)(implicit context: Context) e
   protected val backupLog = LoggerFactory.getLogger(getClass)
   protected val nsdManager = context.getSystemService(classOf[NsdManager])
   protected val component = constructComponent(componentName)
+  private var ncf: NsdConnectionFactory = null
   component match {
     case Success(c) =>
-      val ncf =  new NsdConnectionFactory(nsdManager, c.log)
-      c.connectionFactory = ncf
-      c.serialPortFactory = new AndroidSerialPortFactory(context, zctx)
+      ncf =  new NsdConnectionFactory(nsdManager, c.log)
+      c.setConnectionFactory(ncf)
+      c.setSerialPortFactory(new AndroidSerialPortFactory(context, zctx))
       nsdManager.discoverServices(Constants.DNSSD_SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, ncf)
       c match {
-        case ac: AndroidComponent =>
-          ac.context = context
+        case ac: AndroidComponent => ac.context = context
         case _ => Unit
       }
     case Failure(e) => backupLog.error(s"Couldn't construct a $componentName", e)
@@ -39,7 +39,7 @@ class AndroidComponentRunner(componentName: String)(implicit context: Context) e
     info.setServiceName(Constants.RPC_SERVICE_DNSSD_NAME)
     info.setServiceType(Constants.DNSSD_SERVICE_TYPE)
     info.setAttribute(Constants.COMPONENT_NAME_KEY, c.name)
-    info.setAttribute(Constants.LOG_PORT_KEY, c.log.loggingPort.toString)
+    // info.setAttribute(Constants.LOG_PORT_KEY, c.log.loggingPort.toString)
     info.setPort(servicePort)
     c.log.info(logName, s"Now advertizing $info via DNS-SD")
     nsdManager.registerService(info, NsdManager.PROTOCOL_DNS_SD, registrationListener)
@@ -49,10 +49,7 @@ class AndroidComponentRunner(componentName: String)(implicit context: Context) e
     listeningForData = false
     nsdManager.unregisterService(registrationListener)
     component.foreach { c =>
-      c.connectionFactory match {
-        case listener: NsdManager.DiscoveryListener => nsdManager.stopServiceDiscovery(listener)
-        case _ => c.log.error(logName, "The component's connection factory no longer implements DiscoveryListener, fix AndroidComponentRunner!")
-      }
+      nsdManager.stopServiceDiscovery(ncf)
     }
     super.stop
   }

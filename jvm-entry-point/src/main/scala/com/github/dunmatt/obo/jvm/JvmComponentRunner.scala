@@ -19,14 +19,15 @@ class JvmComponentRunner(component: Class[_]) extends ComponentRunner {
                                  , "The main Obo RPC interface, send your semantic queries here!")
     // why this method is called setText is beyond me... probably beyond explanation in the mortal realm
     info.setText(Map( Constants.COMPONENT_NAME_KEY -> c.name
-                    , Constants.LOG_PORT_KEY       -> c.log.loggingPort.toString))
+                    // , Constants.LOG_PORT_KEY       -> c.log.loggingPort.toString
+                    ))
     c.log.info(logName, s"Now advertizing $info via DNS-SD")
     dnssd.registerService(info)
   }
 
   def go: Unit = constructComponent(component).map { c =>
-    c.connectionFactory = new JmDnsConnectionFactory(dnssd, c.log)
-    c.serialPortFactory = new RxtxSerialPortFactory
+    c.setConnectionFactory(new JmDnsConnectionFactory(dnssd, c.log))
+    c.setSerialPortFactory(new RxtxSerialPortFactory)
     advertizeComponent(c)
     listeningForData = true
     mainLoop(c)

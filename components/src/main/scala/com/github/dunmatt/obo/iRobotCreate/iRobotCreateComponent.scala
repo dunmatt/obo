@@ -25,7 +25,7 @@ class CreateComponent extends Component {
     // TODO: make the serial port a parameter
     val req = SerialPortRequest(None, SerialPortRequest.BAUD_57600)
     // val req = SerialPortRequest(Some("/dev/ttyUSB0"), SerialPortRequest.BAUD_57600)
-    portP.completeWith(serialPortFactory.requestSerialPort(req))
+    portP.completeWith(requestSerialPort(req))
 
     sendCommand(Commands.START)
     sendCommand(Commands.LOAD_STATUS_SONGS)

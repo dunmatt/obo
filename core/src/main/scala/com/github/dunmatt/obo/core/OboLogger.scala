@@ -1,23 +1,13 @@
 package com.github.dunmatt.obo.core
 
-import org.joda.time.Instant
 import org.slf4j.{ Logger, Marker }
 import org.slf4j.event.Level
-import org.zeromq.ZMQ
 
-class OboLogger(basis: Logger) extends Logger {
-  private val loggingSocket = ZMQ.context(1).socket(ZMQ.PUB)
-  val loggingPort = loggingSocket.bindToRandomPort("tcp://*")
+abstract class OboLogger(basis: Logger) extends Logger {
 
   protected def publish(level: Level, msg: String): Unit = publish(getName, level, msg)
 
-  protected def publish(name: String, level: Level, msg: String): Unit = {
-    if (isLevelEnabled(level)) {
-      val entry = LogEntry(name, level, Instant.now, msg)
-      // TODO: should we break this into a multipart message to aide with filtering?
-      loggingSocket.send(entry.getBytes)
-    }
-  }
+  protected def publish(name: String, level: Level, msg: String): Unit
 
   def isLevelEnabled(level: Level): Boolean = level match {
     case Level.DEBUG => isDebugEnabled

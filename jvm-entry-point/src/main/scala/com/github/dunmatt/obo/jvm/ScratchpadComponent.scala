@@ -8,7 +8,7 @@ class ScratchpadComponent extends Component {
   private var sendPings = true
 
   override def onStart = {
-    val other = connectionFactory.connectTo(OboIdentifier("com.github.dunmatt.obo.android.examples.IncrementerComponent"))
+    val other = connectTo(OboIdentifier("com.github.dunmatt.obo.android.examples.IncrementerComponent"))
     other.onSuccess { case conn =>
       val msg = (new MsgBuilder).putString("yo!")
       while (sendPings) {

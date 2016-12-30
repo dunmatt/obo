@@ -24,8 +24,7 @@ class CreateVoiceControlComponent extends AndroidComponent {
 
   override def onStart {
     super.onStart
-    val createId = OboIdentifier("com.github.dunmatt.obo.iRobotCreate.CreateComponent")
-    val createComponentConnection = connectionFactory.connectTo(createId)
+    val createComponentConnection = connectTo(OboIdentifier("com.github.dunmatt.obo.iRobotCreate.CreateComponent"))
 
     new Thread(new Runnable {
       def run {

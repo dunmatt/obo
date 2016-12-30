@@ -13,6 +13,8 @@ trait ComponentRunner {
   implicit protected val zctx = ZMQ.context(1)
   protected val serviceSocket = zctx.socket(ZMQ.REP)
   protected val servicePort = serviceSocket.bindToRandomPort("tcp://*")
+  protected val broadcastSocket = zctx.socket(ZMQ.PUB)
+  protected val broadcastport = broadcastSocket.bindToRandomPort("tcp://*")
   protected val metaMessageFactory = new MetaMessageFactory
   private val logName = classOf[ComponentRunner].getName
   private var factoryCache = Map.empty[String, MessageFactory[_ <: Message[_]]]
@@ -23,7 +25,11 @@ trait ComponentRunner {
 
   protected def constructComponent(cls: Class[_]): Try[Component] = {
     if (classOf[Component].isAssignableFrom(cls)) {
-      Try(cls.newInstance.asInstanceOf[Component])
+      Try {
+        val component = cls.newInstance.asInstanceOf[Component]
+        component.setBroadcastSocket(broadcastSocket)
+        component
+      }
     } else {
       Failure(new Exception(s"${cls.getName} is not a subclass of Component!"))
     }
@@ -97,6 +103,7 @@ trait ComponentRunner {
   }
 
   def stop: Unit = {
+    broadcastSocket.close
     serviceSocket.close
   }
 }
