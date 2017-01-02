@@ -58,7 +58,10 @@ trait Component extends ComponentMetadataTracker {
 
   def onStart: Unit = Unit
 
-  def broadcast(name: RuntimeResourceName, msg: Message[_]): Unit = ???
+  def broadcast(name: RuntimeResourceName, msg: Message[_]): Unit = {
+    broadcastSocket.send(name.name, ZMQ_SNDMORE)
+    broadcastSocket.send(msg.getBytes, 0)
+  }
 
   def connectTo(id: OboIdentifier): Future[Connection] = ??? // connectionFactory.connectTo(id)
 
