@@ -17,8 +17,8 @@ class AndroidComponentRunner(componentName: String)(implicit context: Context) e
   private var ncf: NsdConnectionFactory = null
   component match {
     case Success(c) =>
-      ncf =  new NsdConnectionFactory(nsdManager, c.log)
-      c.setConnectionFactory(ncf)
+      ncf =  new NsdConnectionFactory(nsdManager, c)
+      // c.setConnectionFactory(ncf)
       c.setSerialPortFactory(new AndroidSerialPortFactory(context, zctx))
       nsdManager.discoverServices(Constants.DNSSD_SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, ncf)
       c match {
@@ -39,7 +39,7 @@ class AndroidComponentRunner(componentName: String)(implicit context: Context) e
     info.setServiceName(Constants.RPC_SERVICE_DNSSD_NAME)
     info.setServiceType(Constants.DNSSD_SERVICE_TYPE)
     info.setAttribute(Constants.COMPONENT_NAME_KEY, c.name)
-    // info.setAttribute(Constants.LOG_PORT_KEY, c.log.loggingPort.toString)
+    info.setAttribute(Constants.COMPONENT_ID_KEY, c.instanceId.toString)
     info.setPort(servicePort)
     c.log.info(logName, s"Now advertizing $info via DNS-SD")
     nsdManager.registerService(info, NsdManager.PROTOCOL_DNS_SD, registrationListener)
@@ -48,9 +48,7 @@ class AndroidComponentRunner(componentName: String)(implicit context: Context) e
   override def stop: Unit = {
     listeningForData = false
     nsdManager.unregisterService(registrationListener)
-    component.foreach { c =>
-      nsdManager.stopServiceDiscovery(ncf)
-    }
+    Option(ncf).foreach(cf => nsdManager.stopServiceDiscovery(cf))
     super.stop
   }
 

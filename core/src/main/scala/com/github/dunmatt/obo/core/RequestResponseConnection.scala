@@ -1,19 +1,21 @@
 package com.github.dunmatt.obo.core
 
 import com.github.dunmatt.obo.core.msgpack.MsgReader
+import java.net.URL
 import org.zeromq.ZMQ
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{ Failure, Success, Try }
 import zmq.ZMQ.ZMQ_SNDMORE
 
-class RequestResponseConnection(url: String, log: OboLogger)(implicit val zctx: ZMQ.Context) extends Connection {
+class RequestResponseConnection(url: URL, log: OboLogger)(implicit val zctx: ZMQ.Context) extends Connection {
+  def this(u: String, l: OboLogger)(implicit z: ZMQ.Context) = this(new URL(u), l)
   import RequestResponseConnection._
   private val logName = classOf[RequestResponseConnection].getName
   private val socket = zctx.socket(ZMQ.REQ)
   private val metaMessageFactory = new MetaMessageFactory
   private var factoryCache = Map.empty[String, MessageFactory[_ <: Message[_]]]
-  socket.connect(url)
+  socket.connect(url.toString)
   log.info(logName, s"Connected to $url")
   
   def send(msg: Message[_]): Future[Option[Message[_]]] = {

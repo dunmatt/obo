@@ -15,9 +15,10 @@ trait ComponentRunner {
   protected val servicePort = serviceSocket.bindToRandomPort("tcp://*")
   protected val broadcastSocket = zctx.socket(ZMQ.PUB)
   protected val broadcastport = broadcastSocket.bindToRandomPort("tcp://*")
+  protected val subscriptionSocket = zctx.socket(ZMQ.SUB)
   protected val metaMessageFactory = new MetaMessageFactory
   private val logName = classOf[ComponentRunner].getName
-  private var factoryCache = Map.empty[String, MessageFactory[_ <: Message[_]]]
+  private var messageFactoryCache = Map.empty[String, MessageFactory[_ <: Message[_]]]
 
   protected def constructComponent(className: String): Try[Component] = {
     Try(Class.forName(className)).flatMap(constructComponent)
@@ -27,7 +28,9 @@ trait ComponentRunner {
     if (classOf[Component].isAssignableFrom(cls)) {
       Try {
         val component = cls.newInstance.asInstanceOf[Component]
-        component.setBroadcastSocket(broadcastSocket)
+        component.broadcastSocket = broadcastSocket
+        component.zctx = zctx
+        // component.setBroadcastSocket(broadcastSocket)
         component
       }
     } else {
@@ -35,21 +38,27 @@ trait ComponentRunner {
     }
   }
 
-  protected def makeFactory(name: String): MessageFactory[_ <: Message[_]] = {
+  def addFactory(name: String, fac: MessageFactory[_ <: Message[_]]): Unit = {
+    if (!messageFactoryCache.contains(name)) {
+      messageFactoryCache = messageFactoryCache + ((name -> fac))
+    }
+  }
+
+  def makeFactory(name: String): MessageFactory[_ <: Message[_]] = {  // TODO: consider moving this somewhere else
     Try {
       Class.forName(name).newInstance.asInstanceOf[MessageFactory[_ <: Message[_]]]
     }.getOrElse(new RawMessageFactory)
   }
 
   protected def receiveMessage(factoryName: String): Try[Message[_]] = {
-    if (!factoryCache.contains(factoryName)) {
-      factoryCache = factoryCache + ((factoryName -> makeFactory(factoryName)))
+    if (!messageFactoryCache.contains(factoryName)) {
+      addFactory(factoryName, makeFactory(factoryName))
     }
-    factoryCache(factoryName).unpack(new MsgReader(serviceSocket.recv(0)))
+    messageFactoryCache(factoryName).unpack(new MsgReader(serviceSocket.recv(0)))
   }
 
   protected def handleReceivedMessage(msg: Message[_], component: Component): Unit = {
-    handleMessageInternally(msg).orElse(component.handleMessage(msg)) match {
+    handleMessageInternally(msg).orElse(component.handleMessageBase(msg)) match {
       case Some(reply) =>
         serviceSocket.send(MetaMessage(reply.factory.getName).getBytes, ZMQ_SNDMORE)
         serviceSocket.send(reply.getBytes, 0)
@@ -68,7 +77,7 @@ trait ComponentRunner {
     metaMessageFactory.unpack(new MsgReader(bytes)) match {
       case Success(meta) => handleReceivedMessage(receiveMessage(meta.factoryClassName), component)
       case Failure(e) =>
-        component.log.error(logName, s"Couldn't parse [${bytes.mkString(",")}] as a MetaMessage.", e)
+        component.log.error(logName, s"""Couldn't parse [${bytes.mkString(",")}] as a MetaMessage.""", e)
         abortRecv
     }
   }
@@ -80,13 +89,29 @@ trait ComponentRunner {
     serviceSocket.send(NACK)
   }
 
+  protected def serviceRecvStep(component: Component): Boolean = serviceSocket.recv(ZMQ.NOBLOCK) match {
+    case null => false
+    case bytes => handleReceivedMetaBytes(bytes, component); true
+  }
+
+  protected def subscriptionRecvStep(component: Component): Boolean = subscriptionSocket.recv(ZMQ.NOBLOCK) match {
+    case null => false
+    case bytes => 
+      val topic = RuntimeResourceName(new String(bytes))
+      messageFactoryCache(topic.name).unpack(new MsgReader(serviceSocket.recv(0))).foreach { msg =>
+        component.handleSubscriptionMessage(topic, msg)
+      }
+      true
+  }
+
   protected def mainLoop(component: Component): Unit = {
     component.onStart
     try {
       while (listeningForData) {
-        serviceSocket.recv(ZMQ.NOBLOCK) match {
-          case null => Thread.sleep(50)  // ms
-          case bytes => handleReceivedMetaBytes(bytes, component)
+        val serviced = serviceRecvStep(component)
+        val listened = subscriptionRecvStep(component)
+        if (!(serviced || listened)) {
+          Thread.sleep(50)  // ms
         }
       }
     } catch {
@@ -105,6 +130,7 @@ trait ComponentRunner {
   def stop: Unit = {
     broadcastSocket.close
     serviceSocket.close
+    subscriptionSocket.close
   }
 }
 

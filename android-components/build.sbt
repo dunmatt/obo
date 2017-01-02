@@ -15,7 +15,6 @@ libraryDependencies ++=
   "com.android.support.test" % "runner" % "0.5" % "androidTest" ::
   "com.android.support.test.espresso" % "espresso-core" % "2.2.2" % "androidTest" ::
   // "com.github.dunmatt" %% "core" % "0.0.2-SNAPSHOT" ::
-  "com.squants"  %% "squants"  % "0.6.2" ::
   // "org.apache.jena" % "jena-core" % "3.1.0" ::
   "org.slf4j" % "slf4j-android" % "1.7.21" ::
   Nil
