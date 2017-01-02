@@ -13,6 +13,30 @@ trait MsgField {
   }
 }
 
+case class SeqField[T <: MsgField](xs: Seq[T]) extends MsgField {
+  val serializedLength = smallestArrayLengthByteCount(xs.length) + xs.map(_.serializedLength).sum
+
+  protected def smallestArrayLengthByteCount(size: Int): Int = size match {
+    case b if b <= Constants.FIXARRAY_VALUE_MASK => 1
+    case s if s <= Constants.MAX_UINT_16 => 3
+    case _ => 5
+  }
+
+  def populate(buf: ByteBuffer): Unit = {
+    xs.length match {
+      case len if len <= Constants.FIXARRAY_VALUE_MASK =>
+        buf.put((Constants.FIXMAP_CUTOFF | len).toByte)
+      case len if len <= Constants.MAX_UINT_16 =>
+        buf.put(Constants.ARRAY_16)
+        buf.putShort(len.toShort)
+      case len =>
+        buf.put(Constants.ARRAY_32)
+        buf.putInt(len)
+    }
+    xs.foreach(_.populate(buf))
+  }
+}
+
 case class BlobField(b: ByteBuffer) extends MsgField {
   // TODO: this assumes the blob starts at index zero of the buffer, should it be based on the mark?
   def serializedLength: Int = 1 + smallestUintByteCount(b.limit) + b.limit
@@ -20,10 +44,10 @@ case class BlobField(b: ByteBuffer) extends MsgField {
   def populate(buf: ByteBuffer): Unit = {
     b.flip
     b.limit match {
-      case len if len < Constants.MAX_UINT_8 =>
+      case len if len <= Constants.MAX_UINT_8 =>
         buf.put(Constants.BIN_8)
         buf.put(len.toByte)
-      case len if len < Constants.MAX_UINT_16 =>
+      case len if len <= Constants.MAX_UINT_16 =>
         buf.put(Constants.BIN_16)
         buf.putShort(len.toShort)
       case len =>

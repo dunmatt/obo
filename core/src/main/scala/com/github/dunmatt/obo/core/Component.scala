@@ -45,7 +45,7 @@ trait Component extends ComponentMetadataTracker {
 
   final def handleMessageBase(m: Message[_]): Option[Message[_]] = m match {
     case msg: ComponentCapabilitiesRequest =>
-      Some(ComponentCapabilities(advertizedTopics.map(_.name)))
+      Some(ComponentCapabilities(advertizedTopics))
     case _ =>
       handleMessage(m)
   }

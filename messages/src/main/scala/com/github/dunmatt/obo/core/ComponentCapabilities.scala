@@ -4,7 +4,7 @@ import msgpack.{ MsgBuilder, MsgReader }
 import scala.util.Try
 
 // TODO: put actual information here
-case class ComponentCapabilities(topics: Set[String]) extends Message[ComponentCapabilities] {
+case class ComponentCapabilities(topics: Set[RuntimeResourceName]) extends Message[ComponentCapabilities] {
   type Factory = ComponentCapabilitiesFactory
   def factory = classOf[ComponentCapabilitiesFactory]
 
@@ -18,7 +18,7 @@ class ComponentCapabilitiesFactory extends MessageFactory[ComponentCapabilities]
       // TODO: get topics, once collections are supported by msgpack
       fcn <- rdr.getString(0)
     } yield {
-      ComponentCapabilities(Set(fcn))
+      ComponentCapabilities(Set.empty)
     }
   }
 }

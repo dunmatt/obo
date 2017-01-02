@@ -9,6 +9,8 @@ class MsgBuilder {
 
   def addField(mf: MsgField): MsgBuilder = { fields = fields :+ mf; this }
 
+  def putSeq[T <: MsgField](xs: Seq[T]) = { addField(SeqField(xs)); this }
+
   def putBlob(b: ByteBuffer): MsgBuilder = { addField(BlobField(b)); this }
 
   def putBoolean(b: Boolean): MsgBuilder = { addField(BooleanField(b)); this }

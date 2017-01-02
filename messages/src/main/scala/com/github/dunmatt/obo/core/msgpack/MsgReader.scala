@@ -15,10 +15,24 @@ class MsgReader(private val data: ByteBuffer) {
 
   def dataAsString = data.mkString("[", ", ", "]")
 
-  def getBoolean(field: Int): Try[Boolean] = data.get(map(field)) match {
+  protected def getAnyByIndex(idx: Int): Try[Any] = {
+    val b = data.get(idx)
+    if (MsgReader.isArray(b)) getAnyByIndex(idx)
+    else if (MsgReader.isBlob(b)) getBlobByIndex(idx)
+    else if (MsgReader.isBoolean(b)) getBooleanByIndex(idx)
+    else if (MsgReader.isFloat(b)) getFloatByIndex(idx)
+    else if (MsgReader.isInt(b)) getIntByIndex(idx)
+    else if (MsgReader.isNil(b)) Try(Nil)
+    else if (MsgReader.isString(b)) getStringByIndex(idx)
+    else Failure(new Exception(s"Unsupported array item at $idx"))
+  }
+
+  def getBoolean(field: Int): Try[Boolean] = getBooleanByIndex(map(field))
+
+  protected def getBooleanByIndex(idx: Int): Try[Boolean] = data.get(idx) match {
     case TRUE => Try(true)
     case FALSE => Try(false)
-    case _ => Failure(new Exception(s"Boolean not found at ${map(field)}."))
+    case _ => Failure(new Exception(s"Boolean not found at $idx."))
   }
 
   def getOptionalBoolean(field: Int): Try[Option[Boolean]] = data.get(map(field)) match {
@@ -35,10 +49,12 @@ class MsgReader(private val data: ByteBuffer) {
     case _ => getEnum(field, cls).map(Option.apply)
   }
 
-  def getFloat(field: Int): Try[Double] = data.get(map(field)) match {
-    case FLOAT_32 => Try(data.getFloat(1 + map(field)))
-    case FLOAT_64 => Try(data.getDouble(1 + map(field)))
-    case _ => Failure(new Exception(s"Float type not found at ${map(field)}."))
+  def getFloat(field: Int): Try[Double] = getFloatByIndex(map(field))
+
+  protected def getFloatByIndex(idx: Int): Try[Double] = data.get(idx) match {
+    case FLOAT_32 => Try(data.getFloat(1 + idx))
+    case FLOAT_64 => Try(data.getDouble(1 + idx))
+    case _ => Failure(new Exception(s"Float type not found at $idx."))
   }
 
   def getOptionalFloat(field: Int): Try[Option[Double]] = data.get(map(field)) match {
@@ -46,18 +62,20 @@ class MsgReader(private val data: ByteBuffer) {
     case _ => getFloat(field).map(Option.apply)
   }
 
-  def getInt(field: Int): Try[Long] = data.get(map(field)) match {
+  def getInt(field: Int): Try[Long] = getIntByIndex(map(field))
+
+  def getIntByIndex(idx: Int): Try[Long] = data.get(idx) match {
     case b if b < POSITIVE_FIXINT_CUTOFF => Try(b & POSITIVE_FIXINT_MASK)
     case b if (b & 0xff) > NEGATIVE_FIXINT_THRESHHOLD => Try(-1 * (b & NEGATIVE_FIXINT_VALUE_MASK))  // TODO: check if we need to do a twos complement
-    case INT_8 => Try(data.get(1 + map(field)))
-    case INT_16 => Try(data.getShort(1 + map(field)))
-    case INT_32 => Try(data.getInt(1 + map(field)))
-    case INT_64 => Try(data.getLong(1 + map(field)))
-    case UINT_8 => Try(data.get(1 + map(field)) & 0xffffffffffffffffL)
-    case UINT_16 => Try(data.getShort(1 + map(field)) & 0xffffffffffffffffL)
-    case UINT_32 => Try(data.getInt(1 + map(field)) & 0xffffffffffffffffL)
-    case UINT_64 => Try(data.getLong(1 + map(field)) & 0xffffffffffffffffL)
-    case _ => Failure(new Exception(s"Int type not found at ${map(field)}."))
+    case INT_8 => Try(data.get(1 + idx))
+    case INT_16 => Try(data.getShort(1 + idx))
+    case INT_32 => Try(data.getInt(1 + idx))
+    case INT_64 => Try(data.getLong(1 + idx))
+    case UINT_8 => Try(data.get(1 + idx) & 0xffffffffffffffffL)
+    case UINT_16 => Try(data.getShort(1 + idx) & 0xffffffffffffffffL)
+    case UINT_32 => Try(data.getInt(1 + idx) & 0xffffffffffffffffL)
+    case UINT_64 => Try(data.getLong(1 + idx) & 0xffffffffffffffffL)
+    case _ => Failure(new Exception(s"Int type not found at $idx."))
   }
 
   def getOptionalInt(field: Int): Try[Option[Long]] = data.get(map(field)) match {
@@ -65,8 +83,9 @@ class MsgReader(private val data: ByteBuffer) {
     case _ => getInt(field).map(Option.apply)
   }
 
-  def getString(field: Int): Try[String] = {
-    val idx = map(field)
+  def getString(field: Int): Try[String] = getStringByIndex(map(field))
+
+  def getStringByIndex(idx: Int): Try[String] = {
     if (MsgReader.isString(data.get(idx))) {
       val metaLength = sizeOfMetadataAt(idx)
       val length = sizeOfFieldAt(idx) - metaLength
@@ -89,13 +108,14 @@ class MsgReader(private val data: ByteBuffer) {
   }
 
   // NOTE: getBlob is not thread safe
-  def getBlob(field: Int): Try[ByteBuffer] = {
-    val idx = map(field)
+  def getBlob(field: Int): Try[ByteBuffer] = getBlobByIndex(map(field))
+
+  protected def getBlobByIndex(idx: Int): Try[ByteBuffer] = {
     def size = data.get(idx) match {
       case BIN_8 => Try(data.get(idx + 1) & 0xff)
       case BIN_16 => Try(data.getShort(idx + 1) & 0xffff)
       case BIN_32 => Try(data.getInt(idx + 1))  // yes this means blobs top out at 2GB
-      case _ => Failure(new Exception(s"Binary format not found at ${map(field)}."))
+      case _ => Failure(new Exception(s"Binary format not found at $idx."))
     }
     size.map { s =>
       val pos = data.position
@@ -110,6 +130,34 @@ class MsgReader(private val data: ByteBuffer) {
   def getOptionalBlob(field: Int): Try[Option[ByteBuffer]] = data.get(map(field)) match {
     case NIL => Try(None)
     case _ => getBlob(field).map(Option.apply)
+  }
+
+  def getSeq(field: Int): Try[Seq[Any]] = getSeqByIndex(map(field))
+
+  def getSeq[T](field: Int, t: T): Try[Seq[T]] = {
+    getSeq(field).flatMap(xs => Try(xs.map(_.asInstanceOf[T])))
+  }
+
+  protected def getSeqByIndex(idx: Int): Try[Seq[Any]] = {
+    val first = data.get(idx)
+    if (MsgReader.isArray(first)) {
+      val itemCount = first match {
+        case ARRAY_32 => data.getInt(idx + 1)
+        case ARRAY_16 => data.getShort(idx + 1) & 0xffff
+        case _ => first & FIXARRAY_VALUE_MASK
+      }
+      // val metaLength = sizeOfMetadataAt(idx)
+      var elementIdx = idx + sizeOfMetadataAt(idx)
+      Try {
+        (0 until itemCount).map { i =>
+          val element = getAnyByIndex(elementIdx).get
+          elementIdx += sizeOfFieldAt(elementIdx)
+          element
+        }
+      }
+    } else {
+      Failure(new Exception(s"Array not found at $idx"))
+    }
   }
 
   def getBytes: Array[Byte] = data.array
@@ -171,12 +219,16 @@ object MsgReader {
   }
 
   def sizeOfMetadataAt(i: Int, data: ByteBuffer): Int = data.get(i) match {
+    case ARRAY_16 => 3
+    case ARRAY_32 => 5
+    case f if isArray(f) => 1
     case BIN_8 => 2
     case BIN_16 => 3
     case BIN_32 => 5
     case STR_8 => 2
     case STR_16 => 3
     case STR_32 => 5
+    case f if isString(f) => 1
     // TODO: finish me!
   }
 
@@ -187,6 +239,26 @@ object MsgReader {
     }
     size
   }
+
+  def isArray(format: Byte): Boolean = {
+    format == ARRAY_16 || format == ARRAY_32 || (format & FIXARRAY_MASK) == FIXMAP_CUTOFF
+  }
+
+  def isBlob(format: Byte): Boolean = {
+    format == BIN_32 || format == BIN_16 || format == BIN_8
+  }
+
+  def isBoolean(b: Byte): Boolean = b == TRUE || b == FALSE
+
+  def isFloat(format: Byte): Boolean = format == FLOAT_64 || format == FLOAT_32
+
+  def isInt(format: Byte): Boolean = {
+    format == UINT_64 || format == UINT_32 || format == UINT_16 || format == UINT_8 ||
+    format == INT_64 || format == INT_32 || format == INT_16 || format == INT_8 ||
+    (format & POSITIVE_FIXINT_CUTOFF) == 0 || format >= NEGATIVE_FIXINT_THRESHHOLD
+  }
+
+  def isNil(b: Byte): Boolean = b == NIL
 
   def isString(format: Byte): Boolean = {
     format == STR_8 || format == STR_16 || format == STR_32 || (format & FIXSTR_MASK) == FIXARRAY_CUTOFF

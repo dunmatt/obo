@@ -11,6 +11,7 @@ object Constants {
   val EXT_8                      = 0xc7.toByte
   val FALSE                      = 0xc2.toByte
   val FIXARRAY_CUTOFF            = 0xa0
+  val FIXARRAY_MASK              = 0xf0
   val FIXARRAY_VALUE_MASK        = 0x0f
   val FIXEXT_1                   = 0xd4.toByte
   val FIXEXT_16                  = 0xd8.toByte
