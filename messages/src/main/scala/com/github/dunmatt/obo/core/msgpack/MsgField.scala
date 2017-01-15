@@ -11,16 +11,16 @@ trait MsgField {
     case s if s <= Constants.MAX_UINT_16 => 2
     case _ => 4
   }
-}
 
-case class SeqField[T <: MsgField](xs: Seq[T]) extends MsgField {
-  val serializedLength = smallestArrayLengthByteCount(xs.length) + xs.map(_.serializedLength).sum
-
-  protected def smallestArrayLengthByteCount(size: Int): Int = size match {
+  protected def smallestSeqLengthByteCount(size: Int): Int = size match {
     case b if b <= Constants.FIXARRAY_VALUE_MASK => 1
     case s if s <= Constants.MAX_UINT_16 => 3
     case _ => 5
   }
+}
+
+case class SeqField[T <: MsgField](xs: Seq[T]) extends MsgField {
+  val serializedLength = smallestSeqLengthByteCount(xs.length) + xs.map(_.serializedLength).sum
 
   def populate(buf: ByteBuffer): Unit = {
     xs.length match {
@@ -34,6 +34,27 @@ case class SeqField[T <: MsgField](xs: Seq[T]) extends MsgField {
         buf.putInt(len)
     }
     xs.foreach(_.populate(buf))
+  }
+}
+
+case class MapField[K <: MsgField, V <: MsgField](m: Map[K, V]) extends MsgField {
+  val serializedLength = smallestSeqLengthByteCount(m.size) + m.keys.map(_.serializedLength).sum + m.values.map(_.serializedLength).sum
+
+  def populate(buf: ByteBuffer): Unit = {
+    m.size match {
+      case len if len <= Constants.FIXMAP_VALUE_MASK =>
+        buf.put((Constants.FIXMAP_THRESHHOLD | len).toByte)
+      case len if len <= Constants.MAX_UINT_16 =>
+        buf.put(Constants.MAP_16)
+        buf.putShort(len.toShort)
+      case len =>
+        buf.put(Constants.MAP_32)
+        buf.putInt(len)
+    }
+    m.foreach { case (k, v) =>
+      k.populate(buf)
+      v.populate(buf)
+    }
   }
 }
 

@@ -20,6 +20,7 @@ class JvmComponentRunner(component: Class[_]) extends ComponentRunner {
     // why this method is called setText is beyond me... probably beyond explanation in the mortal realm
     info.setText(Map( Constants.COMPONENT_NAME_KEY -> c.name
                     , Constants.COMPONENT_ID_KEY   -> c.instanceId.toString
+                    , Constants.BROADCAST_PORT_KEY -> broadcastPort.toString
                     ))
     c.log.info(logName, s"Now advertizing $info via DNS-SD")
     dnssd.registerService(info)

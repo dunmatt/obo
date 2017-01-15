@@ -19,6 +19,10 @@ case class LogEntry( name: String
                                               .getBytes
 }
 
+object LogEntry {
+  val factory = classOf[LogEntryFactory]
+}
+
 class LogEntryFactory extends MessageFactory[LogEntry] {
   def unpack(rdr: MsgReader): Try[LogEntry] = {
     for {

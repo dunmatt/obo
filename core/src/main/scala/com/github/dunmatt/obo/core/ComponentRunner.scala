@@ -1,6 +1,7 @@
 package com.github.dunmatt.obo.core
 
 import com.github.dunmatt.obo.core.msgpack.MsgReader
+import java.net.URL
 import org.slf4j.Logger
 import org.zeromq.ZMQ
 import scala.util.{ Failure, Success, Try }
@@ -14,10 +15,11 @@ trait ComponentRunner {
   protected val serviceSocket = zctx.socket(ZMQ.REP)
   protected val servicePort = serviceSocket.bindToRandomPort("tcp://*")
   protected val broadcastSocket = zctx.socket(ZMQ.PUB)
-  protected val broadcastport = broadcastSocket.bindToRandomPort("tcp://*")
+  protected val broadcastPort = broadcastSocket.bindToRandomPort("tcp://*")
   protected val subscriptionSocket = zctx.socket(ZMQ.SUB)
   protected val metaMessageFactory = new MetaMessageFactory
   private val logName = classOf[ComponentRunner].getName
+  // TODO: convert this to a TrieMap
   private var messageFactoryCache = Map.empty[String, MessageFactory[_ <: Message[_]]]
 
   protected def constructComponent(className: String): Try[Component] = {
@@ -29,7 +31,9 @@ trait ComponentRunner {
       Try {
         val component = cls.newInstance.asInstanceOf[Component]
         component.broadcastSocket = broadcastSocket
+        component.broadcastPort = broadcastPort
         component.zctx = zctx
+        component.topicSubscriber = topicSubscriber
         // component.setBroadcastSocket(broadcastSocket)
         component
       }
@@ -58,7 +62,7 @@ trait ComponentRunner {
   }
 
   protected def handleReceivedMessage(msg: Message[_], component: Component): Unit = {
-    handleMessageInternally(msg).orElse(component.handleMessageBase(msg)) match {
+    handleMessageInternally(msg, component).orElse(component.handleMessageBase(msg)) match {
       case Some(reply) =>
         serviceSocket.send(MetaMessage(reply.factory.getName).getBytes, ZMQ_SNDMORE)
         serviceSocket.send(reply.getBytes, 0)
@@ -120,7 +124,7 @@ trait ComponentRunner {
     component.onHalt
   }
 
-  protected def handleMessageInternally(msg: Message[_]): Option[Message[_]] = msg match {
+  protected def handleMessageInternally(msg: Message[_], component: Component): Option[Message[_]] = msg match {
     // TODO: respond to some message types here
     case _ =>
       // log.debug(s"Got message $msg")
@@ -131,6 +135,25 @@ trait ComponentRunner {
     broadcastSocket.close
     serviceSocket.close
     subscriptionSocket.close
+  }
+
+  private val topicSubscriber = new TopicSubscriber {
+    override def connectTo(component: ComponentMetadata) = component.capabilities match {
+      case Some(ComponentCapabilities(topics)) =>
+        topics.foreach { case (topic, factory) =>
+          messageFactoryCache = messageFactoryCache + (topic.name -> factory.newInstance)
+        }
+        subscriptionSocket.connect(component.broadcastUrl.toString)
+      case _ => Unit  // TODO: perhaps send a request for the info
+    }
+
+    override def subscribeTo(topic: RuntimeResourceName) {
+      subscriptionSocket.subscribe(topic.name.getBytes)
+    }
+
+    override def unsubscribeFrom(topic: RuntimeResourceName) {
+      subscriptionSocket.unsubscribe(topic.name.getBytes)
+    }
   }
 }
 

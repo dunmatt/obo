@@ -19,6 +19,7 @@ object Constants {
   val FIXEXT_4                   = 0xd6.toByte
   val FIXEXT_8                   = 0xd7.toByte
   val FIXMAP_CUTOFF              = 0x90
+  val FIXMAP_THRESHHOLD          = 0x80
   val FIXMAP_VALUE_MASK          = 0x0f
   val FIXSTR_CUTOFF              = 0xc0
   val FIXSTR_MASK                = 0xe0

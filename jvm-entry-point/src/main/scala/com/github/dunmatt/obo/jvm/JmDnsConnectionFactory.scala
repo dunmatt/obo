@@ -35,9 +35,11 @@ class JmDnsConnectionFactory(dnssd: JmDNS, component: Component) extends Connect
     for {
       id <- Option(info.getPropertyString(Constants.COMPONENT_ID_KEY))
       cls <- Option(info.getPropertyString(Constants.COMPONENT_NAME_KEY))
+      bp <- Option(info.getPropertyString(Constants.BROADCAST_PORT_KEY))
     } yield {
       val url = new URL("tcp", info.getHostAddress, info.getPort, "")
-      new ComponentMetadata(UUID.fromString(id), cls, url)
+      val broadcastUrl = new URL("tcp", info.getHostAddress, bp.toInt, "")
+      new ComponentMetadata(UUID.fromString(id), cls, url, broadcastUrl)
     }
   }
 

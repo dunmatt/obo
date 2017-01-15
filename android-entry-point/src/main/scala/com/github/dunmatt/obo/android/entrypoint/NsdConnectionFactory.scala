@@ -49,9 +49,11 @@ class NsdConnectionFactory(nsdManager: NsdManager, component: Component) extends
     for {
       id <- Option(info.getAttributes.get(Constants.COMPONENT_ID_KEY)).map(new String(_))
       cls <- Option(info.getAttributes.get(Constants.COMPONENT_NAME_KEY)).map(new String(_))
+      bp <- Option(info.getAttributes.get(Constants.BROADCAST_PORT_KEY)).map(new String(_).toInt)
     } yield {
       val url = new URL("tcp", info.getHost.getHostAddress, info.getPort, "")
-      new ComponentMetadata(UUID.fromString(id), cls, url)
+      val broadcastUrl = new URL("tcp", info.getHost.getHostAddress, bp, "")
+      new ComponentMetadata(UUID.fromString(id), cls, url, broadcastUrl)
     }
   }
 

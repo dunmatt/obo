@@ -22,6 +22,7 @@ class MsgReader(private val data: ByteBuffer) {
     else if (MsgReader.isBoolean(b)) getBooleanByIndex(idx)
     else if (MsgReader.isFloat(b)) getFloatByIndex(idx)
     else if (MsgReader.isInt(b)) getIntByIndex(idx)
+    else if (MsgReader.isMap(b)) getMapByIndex(idx)
     else if (MsgReader.isNil(b)) Try(Nil)
     else if (MsgReader.isString(b)) getStringByIndex(idx)
     else Failure(new Exception(s"Unsupported array item at $idx"))
@@ -160,9 +161,34 @@ class MsgReader(private val data: ByteBuffer) {
     }
   }
 
+  def getMap[K, V](field: Int): Try[Map[K, V]] = getMapByIndex(map(field))
+
+  protected def getMapByIndex[K, V](idx: Int): Try[Map[K, V]] = {
+    val first = data.get(idx)
+    if (MsgReader.isMap(first)) {
+      val itemCount = first match {
+        case MAP_32 => data.getInt(idx + 1)
+        case MAP_16 => data.getShort(idx + 1) & 0xffff
+        case _ => first & FIXMAP_VALUE_MASK
+      }
+      var elementIdx = idx + sizeOfMetadataAt(idx)
+      Try {
+        (0 until itemCount).map { i =>
+          val key = getAnyByIndex(elementIdx).get.asInstanceOf[K]
+          elementIdx += sizeOfFieldAt(elementIdx)
+          val value = getAnyByIndex(elementIdx).get.asInstanceOf[V]
+          elementIdx += sizeOfFieldAt(elementIdx)
+          ((key -> value))
+        }.toMap
+      }
+    } else {
+      Failure(new Exception(s"Map not found at $idx"))
+    }
+  }
+
   def getBytes: Array[Byte] = data.array
 
-  // TODO: add getters for arrays, maps, and exts
+  // TODO: add getters for exts
 
   protected def makeMap: Array[Int] = {
     var inprog: List[Int] = Nil
@@ -225,6 +251,9 @@ object MsgReader {
     case BIN_8 => 2
     case BIN_16 => 3
     case BIN_32 => 5
+    case MAP_16 => 3
+    case MAP_32 => 5
+    case f if isMap(f) => 1
     case STR_8 => 2
     case STR_16 => 3
     case STR_32 => 5
@@ -256,6 +285,10 @@ object MsgReader {
     format == UINT_64 || format == UINT_32 || format == UINT_16 || format == UINT_8 ||
     format == INT_64 || format == INT_32 || format == INT_16 || format == INT_8 ||
     (format & POSITIVE_FIXINT_CUTOFF) == 0 || format >= NEGATIVE_FIXINT_THRESHHOLD
+  }
+
+  def isMap(format: Byte): Boolean = {
+    format == MAP_32 || format == MAP_16 || (FIXMAP_THRESHHOLD <= format && format < FIXMAP_CUTOFF)
   }
 
   def isNil(b: Byte): Boolean = b == NIL
