@@ -20,6 +20,7 @@ private[core] trait ComponentMetadataTracker {
   }
 
   def requestCapabilities(info: ComponentMetadata): Unit = {
+    log.debug(logName, s"Requesting capabilities from $info")
     val conn = new RequestResponseConnection(info.url, log)
     conn.send(new ComponentCapabilitiesRequest).onComplete { res =>
       conn.close

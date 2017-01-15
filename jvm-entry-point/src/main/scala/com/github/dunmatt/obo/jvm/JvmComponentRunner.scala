@@ -14,7 +14,8 @@ class JvmComponentRunner(component: Class[_]) extends ComponentRunner {
 
   protected def advertizeComponent(c: Component): Unit = {
     val info = ServiceInfo.create( Constants.DNSSD_SERVICE_TYPE
-                                 , Constants.RPC_SERVICE_DNSSD_NAME
+                                 // , Constants.RPC_SERVICE_DNSSD_NAME
+                                 , s"${c.instanceId}.${Constants.RPC_SERVICE_DNSSD_NAME}"
                                  , servicePort
                                  , "The main Obo RPC interface, send your semantic queries here!")
     // why this method is called setText is beyond me... probably beyond explanation in the mortal realm
