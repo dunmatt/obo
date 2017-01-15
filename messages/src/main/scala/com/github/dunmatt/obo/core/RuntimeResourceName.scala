@@ -10,13 +10,14 @@ case class RuntimeResourceName(name: String) {
 
   def /(relative: String): RuntimeResourceName = {
     require(isRelativeString(relative), "Cannot scope a global path; call '/' with a relative resource name!")
-    RuntimeResourceName(s"$name/${relative}")
+    if (name.endsWith("/")) {
+      RuntimeResourceName(s"$name${relative}")
+    } else {
+      RuntimeResourceName(s"$name/${relative}")
+    }
   }
 
-  def /(relative: RuntimeResourceName): RuntimeResourceName = {
-    require(relative.isRelative, "Cannot scope a global path; call '/' with a relative resource name!")
-    RuntimeResourceName(s"$name/${relative.name}")
-  }
+  def /(relative: RuntimeResourceName): RuntimeResourceName = this / relative.name
 
   def parent: RuntimeResourceName = name match {
     case "/" => this

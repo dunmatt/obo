@@ -13,8 +13,8 @@ object EntryPoint {
   private val log = LoggerFactory.getLogger(getClass)
 
   def main(args: Array[String]): Unit = {
-    processArgument("com.github.dunmatt.obo.iRobotCreate.CreateComponent")
-    // args.foreach(processArgument)
+    // processArgument("com.github.dunmatt.obo.iRobotCreate.CreateComponent")
+    args.foreach(processArgument)
   }
 
   def processArgument(arg: String): Unit = {

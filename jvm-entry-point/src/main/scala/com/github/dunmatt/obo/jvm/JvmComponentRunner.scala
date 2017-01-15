@@ -26,12 +26,15 @@ class JvmComponentRunner(component: Class[_]) extends ComponentRunner {
     dnssd.registerService(info)
   }
 
-  def go: Unit = constructComponent(component).map { c =>
-    // c.setConnectionFactory(new JmDnsConnectionFactory(dnssd, c.log))
-    c.setSerialPortFactory(new RxtxSerialPortFactory)
-    advertizeComponent(c)
-    listeningForData = true
-    mainLoop(c)
+  def go: Unit = constructComponent(component) match {
+    case Success(c) =>
+      // c.setConnectionFactory(new JmDnsConnectionFactory(dnssd, c.log))
+      c.setSerialPortFactory(new RxtxSerialPortFactory)
+      advertizeComponent(c)
+      listeningForData = true
+      mainLoop(c)
+    case Failure(e) =>
+      throw e
   }
 
   override def stop: Unit = {
