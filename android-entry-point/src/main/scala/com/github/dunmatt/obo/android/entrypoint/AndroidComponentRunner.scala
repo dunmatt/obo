@@ -14,12 +14,11 @@ class AndroidComponentRunner(componentName: String)(implicit context: Context) e
   protected val backupLog = LoggerFactory.getLogger(getClass)
   protected val nsdManager = context.getSystemService(classOf[NsdManager])
   protected val component = constructComponent(componentName)
-  private var ncf: NsdConnectionFactory = null
+  private var ncf: NsdServiceListener = null
   component match {
     case Success(c) =>
-      ncf =  new NsdConnectionFactory(nsdManager, c)
-      // c.setConnectionFactory(ncf)
       c.setSerialPortFactory(new AndroidSerialPortFactory(context, zctx))
+      ncf =  new NsdServiceListener(nsdManager, c)
       nsdManager.discoverServices(Constants.DNSSD_SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, ncf)
       c match {
         case ac: AndroidComponent => ac.context = context

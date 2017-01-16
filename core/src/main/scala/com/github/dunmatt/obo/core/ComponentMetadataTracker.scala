@@ -41,7 +41,6 @@ private[core] trait ComponentMetadataTracker {
 
   private[core] def onComponentDiscovered(info: ComponentMetadata): Unit = Unit
 
-  // TODO: consider adding "delete by address", in case the full metadata isn't available
   def forgetComponent(id: UUID): Unit = metadataCache -= id
   def forgetComponent(info: ComponentMetadata): Unit = metadataCache -= info.id
 }

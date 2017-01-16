@@ -1,49 +1,16 @@
 package com.github.dunmatt.obo.android.entrypoint
 
 import android.net.nsd.{ NsdManager, NsdServiceInfo }
-import com.github.dunmatt.obo.core.{ Component, ComponentMetadata, ConnectionFactory, Constants }
+import com.github.dunmatt.obo.core.{ Component, ComponentMetadata, Constants }
 import java.net.URL
 import java.util.UUID
 
-class NsdConnectionFactory(nsdManager: NsdManager, component: Component) extends ConnectionFactory with NsdManager.DiscoveryListener {
-  private val logName = classOf[NsdConnectionFactory].getName
-  // private var pendingConnections = Set.empty[(OboIdentifier, Promise[Connection])]
-  // private var services = Set.empty[NsdServiceInfo]
-
-  // def connectTo(oi: OboIdentifier): Future[Connection] = ???  // TODO: move this into Component
-  // {
-  //   component.log.info(logName, s"Looking for $oi")
-  //   val p = Promise[Connection]
-  //   pendingConnections = pendingConnections + ((oi, p))
-  //   alertPendingConnections
-  //   p.future
-  // }
-
-  // protected def connect(info: NsdServiceInfo, p: Promise[Connection]): Unit = {
-  //   component.log.info(logName, s"Connecting to ${info.getServiceName} (${info.getHost})")
-  //   val url = s"tcp:/${info.getHost}:${info.getPort}"  // not a typo, the second slash comes from NSD (for some reason)
-  //   val conn = Try(new RequestResponseConnection(url, component.log))
-  //   p.complete(conn)
-  // }
+class NsdServiceListener(nsdManager: NsdManager, component: Component) extends NsdManager.DiscoveryListener {
+  private val logName = classOf[NsdServiceListener].getName
 
   override def onDiscoveryStarted(regType: String): Unit = {
     component.log.info(logName, "NSD based Obo service discovery started.")
   }
-
-  // protected def satisfiesIdentifier(oi: OboIdentifier, info: NsdServiceInfo): Boolean = {
-  //   Option(info.getAttributes.get(Constants.COMPONENT_NAME_KEY)).map { rawName =>
-  //     oi.refersToServiceNamed(new String(rawName))
-  //   }.getOrElse(false)
-  // }
-
-  // protected def alertPendingConnections: Unit = {
-  //   // TODO: clean me up, this isn't as clean as it should be
-  //   pendingConnections = pendingConnections.filter { case (oi, p) =>
-  //     val service = services.find(s => satisfiesIdentifier(oi, s))
-  //     service.foreach(connect(_, p))
-  //     service.isEmpty
-  //   }
-  // }
 
   protected def serviceInfoToMetadata(info: NsdServiceInfo): Option[ComponentMetadata] = {
     for {
@@ -61,9 +28,7 @@ class NsdConnectionFactory(nsdManager: NsdManager, component: Component) extends
     if (service.getServiceType == Constants.DNSSD_SERVICE_TYPE) {
       nsdManager.resolveService(service, new NsdManager.ResolveListener {
         override def onServiceResolved(info: NsdServiceInfo): Unit = {
-          component.log.info(logName, s"found $info")
-          // services = services + info
-          // alertPendingConnections
+          component.log.debug(logName, s"found $info")
           serviceInfoToMetadata(info).foreach { meta =>
             component.addDiscoveredComponent(meta)
           }
@@ -76,7 +41,6 @@ class NsdConnectionFactory(nsdManager: NsdManager, component: Component) extends
   }
 
   override def onServiceLost(service: NsdServiceInfo): Unit = {
-    // services = services - service
     serviceInfoToMetadata(service).foreach { meta =>
       component.forgetComponent(meta)
     }
