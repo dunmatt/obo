@@ -1,6 +1,6 @@
 package com.github.dunmatt.obo.jvm
 
-import com.github.dunmatt.obo.core.Component
+import com.github.dunmatt.obo.core.{ Component, UrlStreamHandlerSetup }
 import java.nio.file.{ Files, Paths }
 import org.slf4j.LoggerFactory
 // import scala.io.Source
@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 // import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
 
-object EntryPoint {
+object EntryPoint extends UrlStreamHandlerSetup {
   private val log = LoggerFactory.getLogger(getClass)
 
   def main(args: Array[String]): Unit = {

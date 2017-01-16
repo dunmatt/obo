@@ -66,7 +66,7 @@ class MsgReader(private val data: ByteBuffer) {
   def getInt(field: Int): Try[Long] = getIntByIndex(map(field))
 
   def getIntByIndex(idx: Int): Try[Long] = data.get(idx) match {
-    case b if b < POSITIVE_FIXINT_CUTOFF => Try(b & POSITIVE_FIXINT_MASK)
+    case b if (b & 0xff) < POSITIVE_FIXINT_CUTOFF => Try(b & POSITIVE_FIXINT_MASK)
     case b if (b & 0xff) > NEGATIVE_FIXINT_THRESHHOLD => Try(-1 * (b & NEGATIVE_FIXINT_VALUE_MASK))  // TODO: check if we need to do a twos complement
     case INT_8 => Try(data.get(1 + idx))
     case INT_16 => Try(data.getShort(1 + idx))
@@ -288,7 +288,8 @@ object MsgReader {
   }
 
   def isMap(format: Byte): Boolean = {
-    format == MAP_32 || format == MAP_16 || (FIXMAP_THRESHHOLD <= format && format < FIXMAP_CUTOFF)
+    val f = format & 0xff
+    format == MAP_32 || format == MAP_16 || (FIXMAP_THRESHHOLD <= f && f < FIXMAP_CUTOFF)
   }
 
   def isNil(b: Byte): Boolean = b == NIL

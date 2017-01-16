@@ -41,6 +41,11 @@ abstract class OboLogger(basis: Logger) extends Logger {
     basis.error(msg)
   }
 
+  def error(name: String, msg: String, t: Throwable): Unit = {
+    publish(name, Level.ERROR, s"$msg\n$t")
+    basis.error(msg, t)
+  }
+
   def info(name: String, msg: String): Unit = {
     publish(name, Level.INFO, msg)
     basis.info(msg)

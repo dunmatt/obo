@@ -26,6 +26,7 @@ private[core] trait ComponentMetadataTracker {
       conn.close
       res match {
         case Success(Some(cc: ComponentCapabilities)) =>
+          log.debug(logName, s"Got some capabilities!!  $cc")
           info.capabilities = Some(cc)
           onComponentDiscovered(info)
         case Success(x) => log.error(logName, s"Unexpected return message: $x")

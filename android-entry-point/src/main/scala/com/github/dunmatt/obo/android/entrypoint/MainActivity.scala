@@ -5,12 +5,12 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.{ AdapterView, ArrayAdapter, TextView, Toast }
-import com.github.dunmatt.obo.core.{ Component, Constants }
+import com.github.dunmatt.obo.core.{ Component, Constants, UrlStreamHandlerSetup }
 import org.slf4j.LoggerFactory
 import scala.collection.JavaConversions._
 import scala.io.Source
 
-class MainActivity extends AppCompatActivity {
+class MainActivity extends AppCompatActivity with UrlStreamHandlerSetup {
   // allows accessing `.value` on TR.resource.constants
   implicit val context = this
   protected val log = LoggerFactory.getLogger(getClass)

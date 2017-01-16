@@ -5,7 +5,7 @@ import java.util.UUID
 case class RuntimeResourceName(name: String) {
   import RuntimeResourceName._
   require(isRoot || !name.endsWith("/"), "Only root can end in slash.")
-  require(name.forall(isValidNameCharacter), "Resource names must match the regex [/_a-zA-Z0-9]+")
+  require(name.forall(isValidNameCharacter), s"Resource names must match the regex [/_a-zA-Z0-9]+, $name does not meet that requirement.")
   require(!name.contains("//"), "Names cannot contain double slashes.")
 
   def /(relative: String): RuntimeResourceName = {

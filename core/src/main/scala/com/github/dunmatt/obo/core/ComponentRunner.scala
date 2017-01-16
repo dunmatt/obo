@@ -58,7 +58,7 @@ trait ComponentRunner {
     if (!messageFactoryCache.contains(factoryName)) {
       addFactory(factoryName, makeFactory(factoryName))
     }
-    messageFactoryCache(factoryName).unpack(new MsgReader(serviceSocket.recv(0)))
+    messageFactoryCache(factoryName).unpack(new MsgReader(serviceSocket.recv(ZMQ.NOBLOCK)))
   }
 
   protected def handleReceivedMessage(msg: Message[_], component: Component): Unit = {
@@ -102,7 +102,7 @@ trait ComponentRunner {
     case null => false
     case bytes => 
       val topic = RuntimeResourceName(new String(bytes))
-      messageFactoryCache(topic.name).unpack(new MsgReader(serviceSocket.recv(0))).foreach { msg =>
+      messageFactoryCache(topic.name).unpack(new MsgReader(subscriptionSocket.recv(ZMQ.NOBLOCK))).foreach { msg =>
         component.handleSubscriptionMessage(topic, msg)
       }
       true
@@ -143,7 +143,7 @@ trait ComponentRunner {
         topics.foreach { case (topic, factory) =>
           messageFactoryCache = messageFactoryCache + (topic.name -> factory.newInstance)
         }
-        subscriptionSocket.connect(component.broadcastUrl.toString)
+        subscriptionSocket.connect(s"tcp://${component.broadcastUrl.getHost}:${component.broadcastUrl.getPort}")
       case _ => Unit  // TODO: perhaps send a request for the info
     }
 

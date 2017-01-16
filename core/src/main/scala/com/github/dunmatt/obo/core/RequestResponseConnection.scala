@@ -14,8 +14,9 @@ class RequestResponseConnection(url: URL, log: OboLogger)(implicit val zctx: ZMQ
   private val logName = classOf[RequestResponseConnection].getName
   private val socket = zctx.socket(ZMQ.REQ)
   private val metaMessageFactory = new MetaMessageFactory
+  // TODO: replace this with a TrieMap
   private var factoryCache = Map.empty[String, MessageFactory[_ <: Message[_]]]
-  socket.connect(url.toString)
+  socket.connect(s"tcp://${url.getHost}:${url.getPort}")
   log.info(logName, s"Connected to $url")
   
   def send(msg: Message[_]): Future[Option[Message[_]]] = {
@@ -23,7 +24,7 @@ class RequestResponseConnection(url: URL, log: OboLogger)(implicit val zctx: ZMQ
       socket.synchronized {
         // log.debug(logName, s"""About to send $msg (${msg.getBytes.mkString(", ")})""")
         socket.send(MetaMessage(msg.factory.getName).getBytes, ZMQ_SNDMORE)
-        socket.send(msg.getBytes)
+        socket.send(msg.getBytes, 0)
         log.debug(logName, s"Sent $msg")
         // TODO: put a timeout here
         val reply = socket.recv(0)
@@ -36,11 +37,11 @@ class RequestResponseConnection(url: URL, log: OboLogger)(implicit val zctx: ZMQ
     }
   }
 
-  private def handleReceivedMetaBytes(bytes: Array[Byte]): Option[Message[_]] = {
-    metaMessageFactory.unpack(new MsgReader(bytes)) match {
+  private def handleReceivedMetaBytes(metaBytes: Array[Byte]): Option[Message[_]] = {
+    metaMessageFactory.unpack(new MsgReader(metaBytes)) match {
       case Success(meta) => handleReceivedMessage(receiveMessage(meta.factoryClassName))
       case Failure(e) =>
-        log.error(logName, s"Couldn't parse [${bytes.mkString(",")}] as a MetaMessage.", e)
+        log.error(logName, s"Couldn't parse [${metaBytes.mkString(",")}] as a MetaMessage.", e)
         abortRecv
     }
   }
@@ -54,7 +55,7 @@ class RequestResponseConnection(url: URL, log: OboLogger)(implicit val zctx: ZMQ
 
   private def abortRecv: Option[Message[_]] = {
     while (socket.hasReceiveMore) {
-      socket.recv(0)
+      socket.recv(ZMQ.NOBLOCK)
     }
     None
   }

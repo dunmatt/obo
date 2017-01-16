@@ -29,11 +29,13 @@ class JvmComponentRunner(component: Class[_]) extends ComponentRunner {
 
   def go: Unit = constructComponent(component) match {
     case Success(c) =>
-      // c.setConnectionFactory(new JmDnsConnectionFactory(dnssd, c.log))
+      val dnssdListener = new JmDnsServiceListener(dnssd, c)
+      dnssd.addServiceListener(Constants.JMDNS_SERVICE_TYPE, dnssdListener)
       c.setSerialPortFactory(new RxtxSerialPortFactory)
       advertizeComponent(c)
       listeningForData = true
       mainLoop(c)
+      dnssd.removeServiceListener(Constants.JMDNS_SERVICE_TYPE, dnssdListener)
     case Failure(e) =>
       throw e
   }
