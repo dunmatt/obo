@@ -6,11 +6,13 @@ lazy val commonSettings = Seq( organization := "com.github.dunmatt"
                              , platformTarget := "android-25"
                              , version := "0.0.2-SNAPSHOT"
                              , scalaVersion := "2.11.8"
-                             , libraryDependencies ++= Seq(
-                                                            "com.squants" %% "squants" % "0.6.2"
-                                                            , "joda-time" % "joda-time" % "2.9.7"
-                                                            , "org.slf4j" % "slf4j-api" % "1.7.21"
-                                                            , "org.zeromq" % "jeromq" % "0.3.5"
+                             , libraryDependencies ++= Seq( "com.squants" %% "squants" % "0.6.2"
+                                                          , "joda-time" % "joda-time" % "2.9.7"
+                                                          , "org.nanohttpd" % "nanohttpd" % "2.3.1"
+                                                          , "org.nanohttpd" % "nanohttpd-websocket" % "2.3.1"
+                                                          // , "org.java-websocket" % "Java-WebSocket" % "1.3.0"
+                                                          , "org.slf4j" % "slf4j-api" % "1.7.21"
+                                                          , "org.zeromq" % "jeromq" % "0.3.5"
                                                           )
                              , SpiKeys.spiPaths := Nil
                              , SpiKeys.traits := Seq( componentName
