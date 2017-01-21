@@ -1,6 +1,7 @@
 package com.github.dunmatt.obo.core
 
 import com.github.dunmatt.obo.core.serial.{ SerialPort, SerialPortFactory, SerialPortRequest }
+import com.github.dunmatt.obo.core.web.UiServer
 import java.util.UUID
 import org.joda.time.Instant
 import org.slf4j.event.Level
@@ -24,6 +25,7 @@ trait Component extends ComponentMetadataTracker {
   private val portRequestTopic = instanceNamespace / Constants.BROADCAST_PORT_KEY
   private val advertizedTopics = TrieMap.empty[RuntimeResourceName, Class[_ <: MessageFactory[_ <: Message[_]]]]
   private var topicSubscriptions = Set.empty[RuntimeResourceName]
+  private val uiServer = new UiServer(8008)  // TODO: make the port number into an argument/setting
 
   val log = new OboLogger(LoggerFactory.getLogger(getClass)) {
     val logNs = RuntimeResourceName("log")
@@ -38,6 +40,8 @@ trait Component extends ComponentMetadataTracker {
   // TODO: look through the rest of core and see if there are other places that need a similar cleanup
   def onHalt: Unit = {
     serialPortFactory.closeEverything
+    uiServer.webSockets.stop
+    uiServer.stop
   }
 
   def handleMessage(m: Message[_]): Option[Message[_]]
@@ -57,7 +61,9 @@ trait Component extends ComponentMetadataTracker {
 
   def name: String = getClass.getName  // TODO: consider changing this to only the classname and final namespace chunk
 
-  def onStart: Unit = Unit
+  def onStart: Unit = {
+    uiServer.webSockets.start
+  }
 
   def advertizeTopic(topic: RuntimeResourceName, factory: Class[_ <: MessageFactory[_ <: Message[_]]]): Unit = {
     if (topic.isGlobal) {
@@ -81,6 +87,7 @@ trait Component extends ComponentMetadataTracker {
       broadcast((runtimeNamespace / topic).name, bytes)
       broadcast((instanceNamespace / topic).name, bytes)
     }
+    uiServer.webSockets.broadcast(s"$topic - $msg")  // TODO: this probably doesn't belong here, find a better place for it
   }
 
   private def broadcast(topicName: String, data: Array[Byte]): Unit = {
