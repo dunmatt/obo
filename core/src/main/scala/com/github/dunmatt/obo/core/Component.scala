@@ -25,7 +25,7 @@ trait Component extends ComponentMetadataTracker {
   private val portRequestTopic = instanceNamespace / Constants.BROADCAST_PORT_KEY
   private val advertizedTopics = TrieMap.empty[RuntimeResourceName, Class[_ <: MessageFactory[_ <: Message[_]]]]
   private var topicSubscriptions = Set.empty[RuntimeResourceName]
-  private val uiServer = new UiServer(8008)  // TODO: make the port number into an argument/setting
+  protected val uiServer = new UiServer(8008)  // TODO: make the port number into an argument/setting
 
   val log = new OboLogger(LoggerFactory.getLogger(getClass)) {
     val logNs = RuntimeResourceName("log")
