@@ -25,6 +25,8 @@ trait Component extends ComponentMetadataTracker {
   private val advertizedTopics = TrieMap.empty[RuntimeResourceName, Class[_ <: MessageFactory[_ <: Message[_]]]]
   private var topicSubscriptions = Set.empty[RuntimeResourceName]
 
+  def parameters: Set[_ <: TypedOperationalParameter[_]] = Set.empty
+
   val log = new OboLogger(LoggerFactory.getLogger(getClass)) {
     val logNs = RuntimeResourceName("log")
     advertizeTopic(logNs, LogEntry.factory)

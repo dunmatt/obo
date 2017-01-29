@@ -1,4 +1,6 @@
+
 libraryDependencies ++= Seq(
+  "commons-cli" % "commons-cli" % "1.3.1",
   "org.apache.jena" % "jena-core" % "3.1.0",
   "org.jmdns" % "jmdns" % "3.5.1",
   // "org.msgpack" %% "msgpack-scala" % "0.6.11",  // TODO: do we really want to do this??

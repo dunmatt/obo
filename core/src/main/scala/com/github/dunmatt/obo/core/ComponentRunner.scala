@@ -22,7 +22,7 @@ trait ComponentRunner {
   // TODO: convert this to a TrieMap
   private var messageFactoryCache = Map.empty[String, MessageFactory[_ <: Message[_]]]
 
-  protected def constructComponent(className: String): Try[Component] = {
+  def constructComponent(className: String): Try[Component] = {
     Try(Class.forName(className)).flatMap(constructComponent)
   }
 
