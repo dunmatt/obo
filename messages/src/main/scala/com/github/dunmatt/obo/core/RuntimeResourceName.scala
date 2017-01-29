@@ -8,6 +8,20 @@ case class RuntimeResourceName(name: String) {
   require(name.forall(isValidNameCharacter), s"Resource names must match the regex [/_a-zA-Z0-9]+, $name does not meet that requirement.")
   require(!name.contains("//"), "Names cannot contain double slashes.")
 
+  def -(prefix: String): RuntimeResourceName = {
+    if (name.startsWith(prefix)) {
+      if (prefix.endsWith("/")) {
+        RuntimeResourceName(name.drop(prefix.length))
+      } else {
+        RuntimeResourceName(name.drop(prefix.length + 1))
+      }
+    } else {
+      this
+    }
+  }
+
+  def -(prefix: RuntimeResourceName): RuntimeResourceName = this - prefix.name
+
   def /(relative: String): RuntimeResourceName = {
     require(isRelativeString(relative), "Cannot scope a global path; call '/' with a relative resource name!")
     if (name.endsWith("/")) {
@@ -29,6 +43,7 @@ case class RuntimeResourceName(name: String) {
   def isGlobal: Boolean = isGlobalString(name)
   def isRelative: Boolean = !isGlobal
   def isRoot: Boolean = name == "/"
+  def startsWith(other: RuntimeResourceName): Boolean = name.startsWith(other.name)
 }
 
 object RuntimeResourceName {

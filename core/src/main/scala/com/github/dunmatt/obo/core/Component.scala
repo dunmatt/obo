@@ -22,6 +22,7 @@ trait Component extends ComponentMetadataTracker {
   val runtimeNamespace = RuntimeResourceName.ROOT  // TODO: make this mutable and/or push it down a level
   final val instanceNamespace = RuntimeResourceName.ROOT / RuntimeResourceName(instanceId)
   private val portRequestTopic = instanceNamespace / Constants.BROADCAST_PORT_KEY
+  private val parameterRequestTopic = instanceNamespace / "parameter"
   private val advertizedTopics = TrieMap.empty[RuntimeResourceName, Class[_ <: MessageFactory[_ <: Message[_]]]]
   private var topicSubscriptions = Set.empty[RuntimeResourceName]
 
@@ -45,8 +46,11 @@ trait Component extends ComponentMetadataTracker {
   def handleMessage(m: Message[_]): Option[Message[_]]
 
   final def handleMessageBase(m: Message[_]): Option[Message[_]] = m match {
-    // case GetVariable(name) if name == portRequestTopic =>  // TODO: there probably wants to be a separate method for handling GetVariables
-    //   Some(SimpleInt(broadcastPort))
+    case GetVariable(name) if name.startsWith(parameterRequestTopic) =>
+      parameters.find(_.name == name - parameterRequestTopic).map(p => VariableValue(name, p.valueString))
+    case SetVariable(name, value) if name.startsWith(parameterRequestTopic) =>
+      parameters.find(_.name == name - parameterRequestTopic).foreach(_.fromString(value))
+      None
     case msg: ComponentCapabilitiesRequest =>
       Some(ComponentCapabilities(advertizedTopics.readOnlySnapshot))
     case _ =>

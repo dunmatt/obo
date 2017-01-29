@@ -125,6 +125,7 @@ trait ComponentRunner {
   }
 
   protected def handleMessageInternally(msg: Message[_], component: Component): Option[Message[_]] = msg match {
+    case _: StopComponent => stop; None
     // TODO: respond to some message types here
     case _ =>
       // log.debug(s"Got message $msg")
